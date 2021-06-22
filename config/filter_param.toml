@@ -1,0 +1,26 @@
+#common paramas
+key = 0 #filter_type 0: ekf, 1:"isekf"
+
+# std(delta pos: m), std(deta delta rot: rad),
+# std(v: m/s), std(w: rad/s)
+[EKF]
+init_state_std = [1.0, 0.1, 0.1, 0.1, 0.1, 0.1,
+                  0.1, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+process_noise= [10.0, 10.0, 10.0, 1.0, 1.0, 1.0] # std(v: m/s), std(w: rad/s) 
+measurement_noise= [0.5, 0.5, 0.5, 0.1, 0.1, 0.1]# std(delta pos: m), std(deta delta rot: rad)
+
+[ISEKF]
+init_state_std = [1.0, 0.1, 0.1, 0.1, 0.1, 0.1,
+                  0.1, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+process_noise= [50.0, 50.0, 50.0, 5.0, 5.0, 5.0] # std(v: m/s), std(w: rad/s) 
+measurement_noise= [0.5, 0.5, 0.5, 0.1, 0.1, 0.1]# std(delta pos: m), std(deta delta rot: rad)
+
+sigma_init = [10.0, 10.0, 10.0, 3.14, 3.14, 3.14]
+epsilon_init = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+#constant
+lambda1 = 1.0
+lambda2 = 1.0
+gamma1 = 1.0
+gamma2 = 1.0
