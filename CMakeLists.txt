@@ -51,9 +51,8 @@ target_link_libraries(motion_filter_lib
   ${toml11_LIBRARIES}
   )
 
-target_include_directories(motion_filter_lib SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
-add_dependencies(motion_filter_lib ${catkin_EXPORTED_TARGETS})
-
+target_include_directories(motion_filter_lib SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+target_link_libraries(motion_filter_lib  ${catkin_LIBRARIES})
 ########
 # MAIN #
 ########
