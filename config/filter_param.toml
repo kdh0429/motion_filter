@@ -7,7 +7,7 @@ key = 0 #filter_type 0: ekf, 1:"isekf"
 init_state_std = [1.0, 0.1, 0.1, 0.1, 0.1, 0.1,
                   0.1, 1.0, 1.0, 1.0, 1.0, 1.0]
 
-process_noise= [10.0, 10.0, 10.0, 1.0, 1.0, 1.0] # std(v: m/s), std(w: rad/s) 
+process_noise= [100.0, 100.0, 100.0, 10.0, 10.0, 10.0] # std(v: m/s), std(w: rad/s) 
 measurement_noise= [0.5, 0.5, 0.5, 0.1, 0.1, 0.1]# std(delta pos: m), std(deta delta rot: rad)
 
 [ISEKF]

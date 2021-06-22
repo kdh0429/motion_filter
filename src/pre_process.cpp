@@ -135,8 +135,8 @@ void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
 
     T_ = T_ + manif::SE3Tangentd(dx.head(6));
     // Heuristic clip
-    Vector6d dx_clip = (dx.tail(6).array().min(sigma_.array()).cwiseMax(-sigma_.array())).matrix();
-    V_ = V_ + dx_clip;
+    // Vector6d dx_clip = (dx.tail(6).array().min(sigma_.array()).cwiseMax(-sigma_.array())).matrix();
+    V_ = V_ + dx.tail(6);
 
     P_ = P_ - K * Z * K.transpose();
 
@@ -169,12 +169,12 @@ void PreProcess::publish()
     //VR message default
     pose_pub_.publish(isometry3d2VRmsg(getTransform()));
 
-    // //pos quat
-    // std_msgs::Float64MultiArray posquat; //a.k.a std::vector<double>
-    // posquat.data.clear();
-    // posquat.data.resize(7);
-    // Eigen::VectorXd::Map(&posquat.data[0], 7) = T_.coeffs();
-    // pos_quat_pub_.publish(posquat);
+    //pos quat
+    std_msgs::Float64MultiArray posquat; //a.k.a std::vector<double>
+    posquat.data.clear();
+    posquat.data.resize(7);
+    Eigen::VectorXd::Map(&posquat.data[0], 7) = T_.coeffs();
+    pos_quat_pub_.publish(posquat);
 
     // //spatial velocity
     // std_msgs::Float64MultiArray spvel; //a.k.a std::vector<double>

@@ -1,13 +1,17 @@
 import numpy as np
 import os
 import time
-
+import sys
+if sys.platform=="win32":
+    sys.path.append('C:\\opt\\ros\\melodic\\x64\\lib\\site-packages')
 import meshcat
 import meshcat.geometry as g
 import meshcat.transformations as tf
 import rospy
-from VR.msg import matrix_3_4
-
+# from VR.msg import matrix_3_4
+from std_msgs.msg import Float64MultiArray
+from scipy.spatial.transform import Rotation as R
+print("imported")
 tfs = dict()
 
 prefix = "F"
@@ -15,38 +19,45 @@ prefix = "F"
 
 def tracker_callback(msg):
     topic_name = msg._connection_header["topic"][1:]
-    T_raw = np.vstack([np.array(msg.firstRow),
-                        np.array(msg.secondRow),
-                        np.array(msg.thirdRow),
-                        np.array([0 , 0, 0, 1])])
-    tfs[topic_name] = T_raw
+    posquat = np.array(msg.data, dtype=np.float64)
+    # print(posquat)
+    # T_raw = np.vstack([np.array(msg.firstRow),
+    #                     np.array(msg.secondRow),
+    #                     np.array(msg.thirdRow),
+    #                     np.array([0 , 0, 0, 1])])
+    # tfs[topic_name] = T_raw
+    T = np.eye(4)
+    T[:3, 3] = posquat[:3]
+    T[:3, :3] = R.from_quat(np.hstack([posquat[3:6], posquat[6:7]])).as_matrix()
+    # print(topic_name, T)
+    tfs[topic_name] = T
 
 rospy.init_node('raw_tracker_node')
 
-for i in range(6):
-    rospy.Subscriber(f"/{prefix}TRACKER{i}", matrix_3_4, tracker_callback)
-
-rospy.Subscriber(f"/{prefix}HMD", matrix_3_4, tracker_callback)
+for i in range(7):
+    rospy.Subscriber(f"/{prefix}posquat{i}", Float64MultiArray, tracker_callback)
 
 asset_dir = os.path.dirname(os.path.abspath(__file__))
 # Create a new visualizer
 vis = meshcat.Visualizer()
 vis.open()
 vis.url()
-
+print("NEW")
 time.sleep(1) #wait for server start
 
 # setting viz assets
-vis[f"{prefix}HMD"].set_object(g.Box([0.2, 0.1, 0.1]))
-tfs[f"{prefix}HMD"] = np.eye(4)
+vis[f"{prefix}posquat6"].set_object(g.Box([0.2, 0.1, 0.1]))
+tfs[f"{prefix}posquat6"] = np.eye(4)
 for i in range(6):
-    vis[f"{prefix}TRACKER{i}"].set_object(g.ObjMeshGeometry.from_file(os.path.join(asset_dir, "assets/Vive_Tracker_meter.obj")))
+    vis[f"{prefix}posquat{i}"].set_object(g.ObjMeshGeometry.from_file(os.path.join(asset_dir, "assets/Vive_Tracker_meter.obj")))
     # vis[f"TRACKER{i}"].set_transform(tf.scale_matrix(0.002))
-    tfs[f"{prefix}TRACKER{i}"] = np.eye(4)
+    tfs[f"{prefix}posquat{i}"] = np.eye(4)
 
 flag = rospy.get_param("/mp/viz_flag")
-while flag :
-    vis[f"{prefix}HMD"].set_transform(tfs[f"{prefix}HMD"])
+# while flag :
+max_time = int(1e+4)
+for i in range(max_time):
+    vis[f"{prefix}posquat6"].set_transform(tfs[f"{prefix}posquat6"])
     for i in range(6):
-        vis[f"{prefix}TRACKER{i}"].set_transform(tfs[f"{prefix}TRACKER{i}"])
+        vis[f"{prefix}posquat{i}"].set_transform(tfs[f"{prefix}posquat{i}"])
     flag = rospy.get_param("/mp/viz_flag")

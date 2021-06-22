@@ -6,15 +6,18 @@ project(motion_filter)
 # set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-std=c++11)
 
-
+if (WIN32)
+message(STATUS "WINDOW")
+  set(toml11_INCLUDE_DIRS "C:/Program Files (x86)/toml11/include")
+endif (WIN32)
 find_package(catkin REQUIRED COMPONENTS
-  VR
-  # geometry_msgs
-  # message_generation
-  roscpp
-  roslib
-  # sensor_msgs
-  std_msgs
+# geometry_msgs
+# message_generation
+roscpp
+roslib
+# sensor_msgs
+std_msgs
+VR
   # tf
   #mujoco_ros
   # eigen_conversions
@@ -25,8 +28,12 @@ include_directories(${Eigen3_INCLUDE_DIRS})
 find_package(manif REQUIRED)
 find_package(toml11 REQUIRED)
 include_directories(${toml11_INCLUDE_DIRS})
+message(STATUS "TOML DIR ${toml11_INCLUDE_DIRS}")
+message(STATUS "MANIF DIR ${manif_FOUND} ${manif_INCLUDE_DIRS}")
 
-catkin_package()
+catkin_package(
+  CATKIN_DEPENDS VR
+)
 
 
 include_directories(
@@ -49,10 +56,15 @@ target_link_libraries(motion_filter_lib
   ${catkin_LIBRARIES}
   ${Eigen3_LIBRARIES}
   ${toml11_LIBRARIES}
+  ${manif_LIBRARIES}
   )
 
-target_include_directories(motion_filter_lib SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
-target_link_libraries(motion_filter_lib  ${catkin_LIBRARIES})
+target_include_directories(motion_filter_lib SYSTEM PUBLIC 
+${EIGEN3_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
+${manif_INCLUDE_DIRS}
+${toml11_INCLUDE_DIRS}
+)
 add_dependencies(motion_filter_lib ${catkin_EXPORTED_TARGETS})
 
 ########
