@@ -50,7 +50,6 @@ vis[f"{prefix}posquat6"].set_object(g.Box([0.2, 0.1, 0.1]))
 tfs[f"{prefix}posquat6"] = np.eye(4)
 for i in range(6):
     vis[f"{prefix}posquat{i}"].set_object(g.ObjMeshGeometry.from_file(os.path.join(asset_dir, "assets/Vive_Tracker_meter.obj")))
-    # vis[f"TRACKER{i}"].set_transform(tf.scale_matrix(0.002))
     tfs[f"{prefix}posquat{i}"] = np.eye(4)
 
 flag = rospy.get_param("/mp/viz_flag")
