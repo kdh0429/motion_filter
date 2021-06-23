@@ -45,7 +45,8 @@ PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verb
         pose_pub_ = nh.advertise<VR::matrix_3_4>("/FHMD", 100);
 
     vel_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Fspvel" + std::to_string(tracker_id), 100);
-    pos_quat_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Fposquat" + std::to_string(tracker_id), 100);
+    fpos_quat_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Fposquat" + std::to_string(tracker_id), 100);
+    rpos_quat_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Rposquat" + std::to_string(tracker_id), 100);
 
     std::string package_path = ros::package::getPath("motion_filter");
     std::string toml_path = package_path + "/config/filter_param.toml";
@@ -57,7 +58,21 @@ PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verb
 
     H_ << I6, O6;
 
-    // std::cout<<"Measurement Jac" <<H_ <<std::endl;
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer,sizeof(buffer),"%d_%m_%Y_%H_%M_%S_",timeinfo);
+    std::string str(buffer);
+
+    std::string rdatafile = package_path + "/data/" + str + std::to_string(tracker_id) + "raw.csv";
+    std::string fdatafile = package_path + "/data/" + str + std::to_string(tracker_id) + "filter.csv";
+
+    rlogger_ = new CsvLogger(rdatafile, keys_);
+    flogger_ = new CsvLogger(fdatafile, keys_);
 
 }
 
@@ -124,8 +139,8 @@ void PreProcess::predict()
 void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
 {
     // ROS_INFO("Update");
-    manif::SE3d T_m_manif = manif::SE3d(T_m);
-    Vector6d z = (T_m_manif - T_).coeffs();
+    T_raw_ = manif::SE3d(T_m);
+    Vector6d z = (T_raw_ - T_).coeffs();
 
     Matrix6d Z = H_ * P_ * H_.transpose() + N_;
     Matrix12x6d K = P_ * H_.transpose() * Z.inverse();
@@ -144,8 +159,8 @@ void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
 void PreProcess::isekfUpdate(Eigen::Isometry3d T_m)
 {
     // ROS_INFO("Update");
-    manif::SE3d T_m_manif = manif::SE3d(T_m);
-    Vector6d z = (T_m_manif - T_).coeffs();
+    T_raw_ = manif::SE3d(T_m);
+    Vector6d z = (T_raw_ - T_).coeffs();
     Vector6d z_clip = (z.array().min(sigma_.array().sqrt()).cwiseMax(-sigma_.array().sqrt())).matrix();
 
     Matrix6d Z = H_ * P_ * H_.transpose() + N_;
@@ -170,11 +185,19 @@ void PreProcess::publish()
     pose_pub_.publish(isometry3d2VRmsg(getTransform()));
 
     //pos quat
-    std_msgs::Float64MultiArray posquat; //a.k.a std::vector<double>
-    posquat.data.clear();
-    posquat.data.resize(7);
-    Eigen::VectorXd::Map(&posquat.data[0], 7) = T_.coeffs();
-    pos_quat_pub_.publish(posquat);
+    std_msgs::Float64MultiArray fposquat; //a.k.a std::vector<double>
+    fposquat.data.clear();
+    fposquat.data.resize(7);
+    Eigen::VectorXd::Map(&fposquat.data[0], 7) = T_.coeffs();
+    fpos_quat_pub_.publish(fposquat);
+    flogger_ -> writeRows(fposquat.data);
+
+    std_msgs::Float64MultiArray rposquat; //a.k.a std::vector<double>
+    rposquat.data.clear();
+    rposquat.data.resize(7);
+    Eigen::VectorXd::Map(&rposquat.data[0], 7) = T_raw_.coeffs();
+    rpos_quat_pub_.publish(rposquat);
+    rlogger_ -> writeRows(rposquat.data);
 
     // //spatial velocity
     // std_msgs::Float64MultiArray spvel; //a.k.a std::vector<double>
@@ -207,7 +230,7 @@ void PreProcess::parseToml(std::string &toml_path)
         tmp = toml::find<std::vector<double>>(ekf, "measurement_noise");
         Vector6d measurement_noise = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(tmp.data(), tmp.size());
         measurement_noise = measurement_noise.array().square();
-        N_ = measurement_noise.asDiagonal();
+        N_ = measurement_noise.asDiagonal() * dt_ * dt_;
 
         sigma_ << 1.0, 1.0, 1.0, 3.14, 3.14, 3.14;
         sigma_ = sigma_ * dt_;
@@ -230,7 +253,7 @@ void PreProcess::parseToml(std::string &toml_path)
         tmp = toml::find<std::vector<double>>(isekf, "measurement_noise");
         Vector6d measurement_noise = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(tmp.data(), tmp.size());
         measurement_noise = measurement_noise.array().square();
-        N_ = measurement_noise.asDiagonal();
+        N_ = measurement_noise.asDiagonal() * dt_ * dt_;
 
         tmp = toml::find<std::vector<double>>(isekf, "sigma_init");
         sigma_init_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(tmp.data(), tmp.size());

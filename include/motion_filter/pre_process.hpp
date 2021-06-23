@@ -14,6 +14,7 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 #include <ros/package.h>
 #include <motion_filter/type_def.hpp>
 #include <std_msgs/Float64MultiArray.h>
+
 namespace motion_filter
 {
 
@@ -39,7 +40,9 @@ void dynamicClipUpdate(Vector6d z);
 void publish();
 
 ros::Publisher pose_pub_;
-ros::Publisher pos_quat_pub_;
+ros::Publisher fpos_quat_pub_; //filter
+ros::Publisher rpos_quat_pub_; //raw
+
 ros::Publisher vel_pub_;
 
 
@@ -53,6 +56,8 @@ bool verbose_;
 bool is_first_ = true;
 //state variable
 manif::SE3d T_;
+manif::SE3d T_raw_;
+
 Vector6d V_;
 
 //model jacobian
@@ -76,6 +81,11 @@ Vector6d lambda1_;
 Vector6d lambda2_;
 Vector6d gamma1_;
 Vector6d gamma2_;
+
+//Logger
+CsvLogger* rlogger_;
+CsvLogger* flogger_;
+std::vector<std::string> keys_ = {"x", "y", "z", "qw", "qx", "qy", "qz"};
 
 };
 }

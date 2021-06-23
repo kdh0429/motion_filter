@@ -44,19 +44,23 @@ include_directories(
 ########
 # LIBS #
 ########
-file(GLOB SRC
-  "src/data_handler.cpp"
-  "src/pre_process.cpp"
+file(GLOB MFSRC
+"src/data_handler.cpp"
+"src/pre_process.cpp"
+)
+add_library(logger_lib SHARED
+  "src/logger.cpp"
 )
 
 add_library(motion_filter_lib SHARED
-  ${SRC}
+  ${MFSRC}
 )
 target_link_libraries(motion_filter_lib
   ${catkin_LIBRARIES}
   ${Eigen3_LIBRARIES}
   ${toml11_LIBRARIES}
   ${manif_LIBRARIES}
+  logger_lib
   )
 
 target_include_directories(motion_filter_lib SYSTEM PUBLIC 
@@ -66,6 +70,7 @@ ${manif_INCLUDE_DIRS}
 ${toml11_INCLUDE_DIRS}
 )
 add_dependencies(motion_filter_lib ${catkin_EXPORTED_TARGETS})
+
 
 ########
 # MAIN #
@@ -86,3 +91,7 @@ add_dependencies(main ${catkin_EXPORTED_TARGETS})
 add_executable(mainf_test test/manif_test.cpp)
 target_include_directories(mainf_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
 target_include_directories(mainf_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})
+
+add_executable(logger_test test/logger_test.cpp)
+target_link_libraries(logger_test logger_lib ${catkin_LIBRARIES})
+target_include_directories(logger_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
