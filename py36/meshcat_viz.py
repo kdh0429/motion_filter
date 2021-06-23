@@ -14,8 +14,8 @@ from scipy.spatial.transform import Rotation as R
 print("imported")
 tfs = dict()
 
-prefix = "F"
-# prefix = ""
+# prefix = "F"
+prefix = "R"
 
 def tracker_callback(msg):
     topic_name = msg._connection_header["topic"][1:]
@@ -28,7 +28,7 @@ def tracker_callback(msg):
     # tfs[topic_name] = T_raw
     T = np.eye(4)
     T[:3, 3] = posquat[:3]
-    T[:3, :3] = R.from_quat(np.hstack([posquat[3:6], posquat[6:7]])).as_matrix()
+    T[:3, :3] = R.from_quat(posquat[3:]).as_matrix()
     # print(topic_name, T)
     tfs[topic_name] = T
 
@@ -39,6 +39,7 @@ for i in range(7):
 
 asset_dir = os.path.dirname(os.path.abspath(__file__))
 # Create a new visualizer
+# port = np.random.randint(6000, 7000)
 vis = meshcat.Visualizer()
 vis.open()
 vis.url()
@@ -53,10 +54,11 @@ for i in range(6):
     tfs[f"{prefix}posquat{i}"] = np.eye(4)
 
 flag = rospy.get_param("/mp/viz_flag")
-# while flag :
-max_time = int(1e+4)
-for i in range(max_time):
+while flag :
+# max_time = int(1e+4)
+# for i in range(max_time):
     vis[f"{prefix}posquat6"].set_transform(tfs[f"{prefix}posquat6"])
     for i in range(6):
         vis[f"{prefix}posquat{i}"].set_transform(tfs[f"{prefix}posquat{i}"])
     flag = rospy.get_param("/mp/viz_flag")
+    time.sleep(0.01) 

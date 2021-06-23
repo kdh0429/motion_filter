@@ -86,7 +86,7 @@ Eigen::Isometry3d PreProcess::getTransform()
     Vector7d pos_quat = T_.coeffs();
     Eigen::Isometry3d T_iso;
     T_iso.translation() = pos_quat.head(3);
-    Eigen::Quaterniond q(pos_quat(3), pos_quat(4), pos_quat(5), pos_quat(6));
+    Eigen::Quaterniond q(pos_quat(6), pos_quat(3), pos_quat(4), pos_quat(5));
     T_iso.linear() = q.normalized().toRotationMatrix();
 
     return T_iso;
