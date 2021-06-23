@@ -68,8 +68,8 @@ PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verb
     strftime(buffer,sizeof(buffer),"%d_%m_%Y_%H_%M_%S_",timeinfo);
     std::string str(buffer);
 
-    std::string rdatafile = package_path + "/data/" + str + std::to_string(tracker_id) + "raw.csv";
-    std::string fdatafile = package_path + "/data/" + str + std::to_string(tracker_id) + "filter.csv";
+    std::string rdatafile = package_path + "/data/" + str + id2name_.at(i) + "_raw.csv";
+    std::string fdatafile = package_path + "/data/" + str + id2name_.at(i) + "_filter.csv";
 
     rlogger_ = new CsvLogger(rdatafile, keys_);
     flogger_ = new CsvLogger(fdatafile, keys_);

@@ -86,7 +86,7 @@ Vector6d gamma2_;
 CsvLogger* rlogger_;
 CsvLogger* flogger_;
 std::vector<std::string> keys_ = {"x", "y", "z", "qw", "qx", "qy", "qz"};
-
+std::vector<std::string> id2name_ = {"base", "chest", "larm", "lhand", "rarm", "rhand", "head"}
 };
 }
 #endif // PRE_PROCESS_H
