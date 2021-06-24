@@ -37,7 +37,7 @@ PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verb
 {
     tracker_id_ = tracker_id;
     dt_ = dt;
-    verbose = verbose_;
+    verbose_ = verbose;
 
     if (tracker_id_ < NUM_TRACKER)
         pose_pub_ = nh.advertise<VR::matrix_3_4>("/FTRACKER" + std::to_string(tracker_id), 100);
@@ -57,22 +57,25 @@ PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verb
     O6.setZero();
 
     H_ << I6, O6;
+    if (verbose_)
+    {
+        time_t rawtime;
+        struct tm * timeinfo;
+        char buffer[80];
 
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
+        time (&rawtime);
+        timeinfo = localtime(&rawtime);
 
-    time (&rawtime);
-    timeinfo = localtime(&rawtime);
+        strftime(buffer,sizeof(buffer),"%d_%m_%Y_%H_%M_%S_",timeinfo);
+        std::string dtimestr(buffer);
 
-    strftime(buffer,sizeof(buffer),"%d_%m_%Y_%H_%M_%S_",timeinfo);
-    std::string str(buffer);
+        std::string dirpath = package_path + "/data/" + dtimestr;
+        std::string rdatafile = id2name_.at(tracker_id) + "_raw.csv";
+        std::string fdatafile = id2name_.at(tracker_id) + "_filter.csv";
 
-    std::string rdatafile = package_path + "/data/" + str + id2name_.at(tracker_id) + "_raw.csv";
-    std::string fdatafile = package_path + "/data/" + str + id2name_.at(tracker_id) + "_filter.csv";
-
-    rlogger_ = new CsvLogger(rdatafile, keys_);
-    flogger_ = new CsvLogger(fdatafile, keys_);
+        rlogger_ = new CsvLogger(dirpath, rdatafile, keys_);
+        flogger_ = new CsvLogger(dirpath, fdatafile, keys_);
+    }
 
 }
 
@@ -190,14 +193,18 @@ void PreProcess::publish()
     fposquat.data.resize(7);
     Eigen::VectorXd::Map(&fposquat.data[0], 7) = T_.coeffs();
     fpos_quat_pub_.publish(fposquat);
-    flogger_ -> writeRows(fposquat.data);
 
     std_msgs::Float64MultiArray rposquat; //a.k.a std::vector<double>
     rposquat.data.clear();
     rposquat.data.resize(7);
     Eigen::VectorXd::Map(&rposquat.data[0], 7) = T_raw_.coeffs();
     rpos_quat_pub_.publish(rposquat);
-    rlogger_ -> writeRows(rposquat.data);
+
+    if (verbose_)
+    {
+        flogger_ -> writeRows(fposquat.data);
+        rlogger_ -> writeRows(rposquat.data);
+    }
 
     // //spatial velocity
     // std_msgs::Float64MultiArray spvel; //a.k.a std::vector<double>

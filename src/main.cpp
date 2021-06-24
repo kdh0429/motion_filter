@@ -9,6 +9,18 @@ using namespace motion_filter;
 
 int main(int argc, char **argv)
 {
+    bool verbose;
+    if (argc==2)
+    {   
+        std::string str = argv[argc-1];
+        verbose = std::stoi(str);
+    }
+    else
+    {
+        std::cout<<"add at least one argument whether save log file or not(0 not saving, 1 save)!";
+        return -1;
+    }
+
     ros::init(argc, argv, "motion_filter");
     ros::NodeHandle nh("~");
 
@@ -18,14 +30,12 @@ int main(int argc, char **argv)
     PreProcess *filters[NUM_TRACKER + 1];
     for (int i=0;i<NUM_TRACKER + 1;i++)
     {
-        filters[i] = new PreProcess(nh, i, dt, false);
+        filters[i] = new PreProcess(nh, i, dt, verbose);
     }
     
 
     ros::Rate loop_rate(1.0/dt);
-    ros::param::set("/mp/viz_flag", true);
-    ros::param::set("/mp/restart_flag", false);
-    bool restart;
+    bool restart = false;
 
     auto func = [&](Eigen::Isometry3d* T, int i, bool restart, PreProcess *filter)
     {
@@ -41,7 +51,6 @@ int main(int argc, char **argv)
 
     while(ros::ok())
     {
-        ros::param::get("/mp/restart_flag", restart);
         Eigen::Isometry3d* T;
 
         T = dh.getObs();
@@ -60,12 +69,9 @@ int main(int argc, char **argv)
                 ts.at(i).join();
         }
 
-        ros::param::set("/mp/restart_flag", false);
-
         ros::spinOnce();
         // loop_rate.sleep();
     }
 
-    ros::param::set("/mp/viz_flag", false);
     return 0;
 }

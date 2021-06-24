@@ -3,12 +3,13 @@
 
 #include <fstream>
 #include <vector>
+#include <boost/filesystem.hpp>
 
 class CsvLogger
 {
 
 public:
-CsvLogger(std::string filename, std::vector<std::string> columns);
+CsvLogger(std::string dirpath, std::string filename, std::vector<std::string> keys);
 ~CsvLogger();
 void writeRows(std::vector<double> data);
 

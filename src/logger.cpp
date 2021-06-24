@@ -1,11 +1,19 @@
 #include <logger.h>
 #include <iostream>
 
-CsvLogger::CsvLogger(std::string filename, std::vector<std::string> keys)
+CsvLogger::CsvLogger(std::string dirpath, std::string filename, std::vector<std::string> keys)
 {
-    std::cout<< "Open "<<filename<<std::endl;
+    boost::filesystem::path dir(dirpath);
+    std::string full_path;
 
-    csv_file.open(filename, std::ofstream::out | std::ofstream::app);
+    if(boost::filesystem::create_directory(dir))
+    {
+        std::cerr<< "Directory Created: "<<dirpath<<std::endl;
+    }
+
+    full_path = dirpath + "/" + filename;
+    std::cout<< "Open "<<full_path<<std::endl;
+    csv_file.open(full_path, std::ofstream::out | std::ofstream::app);
     ncols_ = keys.size();
 
     for (int i=0;i<ncols_;i++)

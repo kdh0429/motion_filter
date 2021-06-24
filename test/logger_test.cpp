@@ -22,14 +22,15 @@ int main()
     std::string str(buffer);
 
     std::string package_path = ros::package::getPath("motion_filter");
-    std::string datafile = package_path + "/data/" + str + "_test.csv";
+    std::string dirpath = package_path + "/data/" + str;
+    std::string fname = "test.csv";
 
     std::vector<std::string> keys;
     for (int i=0;i<NUM_KEY;i++)
     {
         keys.push_back("x" + std::to_string(i));
     }
-    CsvLogger logger(datafile, keys);
+    CsvLogger logger(dirpath, fname, keys);
 
     std::vector<double> data;
     for (int i=0; i< NUM_COL;i++)

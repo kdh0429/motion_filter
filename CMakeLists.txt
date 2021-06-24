@@ -10,6 +10,8 @@ if (WIN32)
 message(STATUS "WINDOW")
   set(toml11_INCLUDE_DIRS "C:/Program Files (x86)/toml11/include")
 endif (WIN32)
+find_package(Boost REQUIRED COMPONENTS filesystem)
+
 find_package(catkin REQUIRED COMPONENTS
 # geometry_msgs
 # message_generation
@@ -44,14 +46,20 @@ include_directories(
 ########
 # LIBS #
 ########
+add_library(logger_lib SHARED
+"src/logger.cpp"
+)
+target_include_directories(logger_lib SYSTEM PUBLIC 
+${Boost_INCLUDE_DIRS}
+)
+target_link_libraries(logger_lib
+${Boost_LIBRARIES}
+)
+
 file(GLOB MFSRC
 "src/data_handler.cpp"
 "src/pre_process.cpp"
 )
-add_library(logger_lib SHARED
-  "src/logger.cpp"
-)
-
 add_library(motion_filter_lib SHARED
   ${MFSRC}
 )
