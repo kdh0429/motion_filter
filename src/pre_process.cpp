@@ -96,7 +96,7 @@ Eigen::Isometry3d PreProcess::getTransform()
 }
 
  
-void PreProcess::step(Eigen::Isometry3d T_m)
+void PreProcess::step(Eigen::Isometry3d T_m, bool tracker_status)
 {
     if (is_first_)
     {
@@ -115,7 +115,7 @@ void PreProcess::step(Eigen::Isometry3d T_m)
         else
             std::logic_error("Unknown filter type");
     }
-    publish();
+    publish(tracker_status);
 }
 void PreProcess::restart()
 {
@@ -161,14 +161,14 @@ void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
 }
 void PreProcess::isekfUpdate(Eigen::Isometry3d T_m)
 {
-    ROS_INFO("Update");
+    // ROS_INFO("Update");
     // std::cout<<tracker_id_<<" Traw:\t"<<T_m.linear().determinant()<<std::endl;
 
     T_raw_ = manif::SE3d(T_m);
     Vector6d z = (T_raw_ - T_).coeffs();
     Vector6d z_clip = (z.array().min(sigma_.array().sqrt()).max(-sigma_.array().sqrt())).matrix();
-    std::cout<<tracker_id_<<" sigma_:\t"<<sigma_.array().sqrt().matrix().transpose()<<std::endl;
-    std::cout<<tracker_id_<<" z_clip:\t"<<z_clip.transpose()<<std::endl;
+    // std::cout<<tracker_id_<<" sigma_:\t"<<sigma_.array().sqrt().matrix().transpose()<<std::endl;
+    // std::cout<<tracker_id_<<" z_clip:\t"<<z_clip.transpose()<<std::endl;
     
 
     Matrix6d Z = H_ * P_ * H_.transpose() + N_;
@@ -189,7 +189,7 @@ void PreProcess::dynamicClipUpdate(Vector6d z)
     sigma_ = (lambda1_.array() * sigma_.array() + gamma1_.array() * epsilon_.array() * Eigen::exp(-epsilon_.array())).matrix();
     epsilon_ = (lambda2_.array() * epsilon_.array() + gamma2_.array() * z.array().square()).matrix();
 }
-void PreProcess::publish()
+void PreProcess::publish(bool tracker_status)
 {
     //VR message default
     pose_pub_.publish(isometry3d2VRmsg(getTransform()));
@@ -205,10 +205,13 @@ void PreProcess::publish()
     rposquat.data.clear();
     rposquat.data.resize(7);
     Eigen::VectorXd::Map(&rposquat.data[0], 7) = T_raw_.coeffs();
+
     rpos_quat_pub_.publish(rposquat);
 
     if (verbose_)
     {
+        fposquat.data.push_back((double)tracker_status);
+        rposquat.data.push_back((double)tracker_status);
         flogger_ -> writeRows(fposquat.data);
         rlogger_ -> writeRows(rposquat.data);
     }

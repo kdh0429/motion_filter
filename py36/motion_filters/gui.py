@@ -123,7 +123,9 @@ class PlotGUI:
         self.fcurves = []  # filter
 
         for pw in self.pws:
-            pw.enableAutoRange()
+            # pw.enableAutoRange()
+            pw.setXRange(0, 2)
+            pw.setYRange(-2, 2)
             pw.setLabel("bottom", "time", "s")
             pw.setLabel("left", "pose", "m")
             pw.setBackground("w")
