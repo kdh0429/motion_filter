@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         if (restart)
             filters[i] -> restart();
         double flag = ((T+i)->linear()).determinant();
-        
+        // std::cout<<"index: "<<i<<" flag: "<<flag<<std::endl;
         if (fabs(flag - 1.0) < 1e-6)
         {
             filters[i] -> step(T[i]);

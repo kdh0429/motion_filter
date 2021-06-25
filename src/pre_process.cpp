@@ -161,10 +161,15 @@ void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
 }
 void PreProcess::isekfUpdate(Eigen::Isometry3d T_m)
 {
-    // ROS_INFO("Update");
+    ROS_INFO("Update");
+    // std::cout<<tracker_id_<<" Traw:\t"<<T_m.linear().determinant()<<std::endl;
+
     T_raw_ = manif::SE3d(T_m);
     Vector6d z = (T_raw_ - T_).coeffs();
-    Vector6d z_clip = (z.array().min(sigma_.array().sqrt()).cwiseMax(-sigma_.array().sqrt())).matrix();
+    Vector6d z_clip = (z.array().min(sigma_.array().sqrt()).max(-sigma_.array().sqrt())).matrix();
+    std::cout<<tracker_id_<<" sigma_:\t"<<sigma_.array().sqrt().matrix().transpose()<<std::endl;
+    std::cout<<tracker_id_<<" z_clip:\t"<<z_clip.transpose()<<std::endl;
+    
 
     Matrix6d Z = H_ * P_ * H_.transpose() + N_;
     Matrix12x6d K = P_ * H_.transpose() * Z.inverse();
@@ -176,6 +181,8 @@ void PreProcess::isekfUpdate(Eigen::Isometry3d T_m)
 
     P_ = P_ - K * Z * K.transpose();
     dynamicClipUpdate(z);
+    // std::cout<<"T   :\t"<<T_.coeffs().transpose()<<std::endl;
+
 }
 void PreProcess::dynamicClipUpdate(Vector6d z)
 {
@@ -269,19 +276,20 @@ void PreProcess::parseToml(std::string &toml_path)
         tmp = toml::find<std::vector<double>>(isekf, "epsilon_init");
         epsilon_init_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(tmp.data(), tmp.size());
 
-        // tmp = toml::find<std::vector<double>>(isekf, "lambda1");
-        // lambda1_ = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(tmp.data(), tmp.size());
-        double tmp1 = toml::find<double>(isekf, "lambda1");
-        lambda1_ << tmp1, tmp1, tmp1, tmp1, tmp1, tmp1;
+        std::vector<double> tmp1 = toml::find<std::vector<double>>(isekf, "lambda1");
+        lambda1_ << tmp1.at(0), tmp1.at(0), tmp1.at(0), tmp1.at(1), tmp1.at(1), tmp1.at(1);
 
-        tmp1 = toml::find<double>(isekf, "lambda2");
-        lambda2_ << tmp1, tmp1, tmp1, tmp1, tmp1, tmp1;
+        tmp1 = toml::find<std::vector<double>>(isekf, "lambda2");
+        lambda2_ << tmp1.at(0), tmp1.at(0), tmp1.at(0), tmp1.at(1), tmp1.at(1), tmp1.at(1);
 
-        tmp1 = toml::find<double>(isekf, "gamma1");
-        gamma1_ << tmp1, tmp1, tmp1, tmp1, tmp1, tmp1;
+        tmp1 = toml::find<std::vector<double>>(isekf, "gamma1");
+        gamma1_ << tmp1.at(0), tmp1.at(0), tmp1.at(0), tmp1.at(1), tmp1.at(1), tmp1.at(1);
 
-        tmp1 = toml::find<double>(isekf, "gamma2");
-        gamma2_ << tmp1, tmp1, tmp1, tmp1, tmp1, tmp1;
+        tmp1 = toml::find<std::vector<double>>(isekf, "gamma2");
+        gamma2_ << tmp1.at(0), tmp1.at(0), tmp1.at(0), tmp1.at(1), tmp1.at(1), tmp1.at(1);
+
+        sigma_ = sigma_init_;
+        epsilon_ = epsilon_init_;
     }
 }
 
