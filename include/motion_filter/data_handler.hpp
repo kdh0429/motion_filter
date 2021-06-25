@@ -15,8 +15,12 @@ public:
     {
         for (int i=0;i<NUM_TRACKER;i++){
             trackers_sub_[i] = nh.subscribe("/TRACKER" + std::to_string(i), 100, &DataHandler::trackersCallback, this);
+            raw_poses_[i].linear().setIdentity();
+            raw_poses_[i].translation().setZero();            
         }
         hmd_sub_ = nh.subscribe("/HMD", 100, &DataHandler::hmdCallback, this);
+        raw_poses_[NUM_TRACKER].linear().setIdentity();
+        raw_poses_[NUM_TRACKER].translation().setZero();  
     }
     void trackersCallback(const ros::MessageEvent<VR::matrix_3_4>& event);
     void hmdCallback(const VR::matrix_3_4 &msg);
