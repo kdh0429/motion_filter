@@ -94,16 +94,21 @@ class PlotGUI:
         self.pws = [pg.PlotWidget(name=f"self.keys[i]") for i in range(7)]  # 6dof pose into 7 variable
         self.max_buffer = max_buffer
         self.plot_hz = plot_hz
+        self.rrecent = np.zeros(7)
+        self.frecent = np.zeros(7)
         self.set_plot_widget()
         self.reset_poses()
         self.set_subscribe()
 
     def update(self):
+        self.rposes.append(self.rrecent)
+        self.fposes.append(self.frecent)
+        
         rtmp = np.vstack(self.rposes).T  # (7, num_data)
         ftmp = np.vstack(self.fposes).T  # (7, num_data)
 
-        rx = np.arange(rtmp.shape[1])
-        fx = np.arange(ftmp.shape[1])
+        rx = np.arange(rtmp.shape[1])/float(self.plot_hz)
+        fx = np.arange(ftmp.shape[1])/float(self.plot_hz)
 
         for idx in range(7):
             self.rcurves[idx].setData(x=rx, y=rtmp[idx])
@@ -119,7 +124,7 @@ class PlotGUI:
 
         for pw in self.pws:
             pw.enableAutoRange()
-            pw.setLabel("bottom", "steps", "cnt")
+            pw.setLabel("bottom", "time", "s")
             pw.setLabel("left", "pose", "m")
             pw.setBackground("w")
             self.rcurves.append(pw.plot(pen="r"))
@@ -135,10 +140,10 @@ class PlotGUI:
         posquat = np.array(msg.data, dtype=np.float64)
 
         if topic_name[0] == "R" and topic_name[-1] == str(self.id):
-            self.rposes.append(posquat)
+            self.rrecent = posquat
 
         if topic_name[0] == "F" and topic_name[-1] == str(self.id):
-            self.fposes.append(posquat)
+            self.frecent = posquat
 
 
 class MainGUI(QMainWindow):
