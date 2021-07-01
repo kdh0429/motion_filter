@@ -34,4 +34,11 @@ void DataHandler::hmdCallback(const VR::matrix_3_4 &msg)
 
 }
 
+void DataHandler::trackersStatusCallback(const std_msgs::Bool &msg)
+{
+
+    tracker_status_ = msg.data;
+    // std::cout<<tracker_status_<<std::endl;
+}
+
 }

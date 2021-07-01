@@ -96,7 +96,7 @@ Eigen::Isometry3d SE3Filter::getTransform()
 }
 
  
-void SE3Filter::step(Eigen::Isometry3d T_m)
+void PreProcess::step(Eigen::Isometry3d T_m, bool tracker_status)
 {
     if (is_first_)
     {
@@ -115,7 +115,7 @@ void SE3Filter::step(Eigen::Isometry3d T_m)
         else
             std::logic_error("Unknown filter type");
     }
-    publish();
+    publish(tracker_status);
 }
 void SE3Filter::restart()
 {
@@ -189,7 +189,7 @@ void SE3Filter::dynamicClipUpdate(Vector6d z)
     sigma_ = (lambda1_.array() * sigma_.array() + gamma1_.array() * epsilon_.array() * Eigen::exp(-epsilon_.array())).matrix();
     epsilon_ = (lambda2_.array() * epsilon_.array() + gamma2_.array() * z.array().square()).matrix();
 }
-void SE3Filter::publish()
+void PreProcess::publish(bool tracker_status)
 {
     //VR message default
     pose_pub_.publish(isometry3d2VRmsg(getTransform()));
@@ -205,10 +205,13 @@ void SE3Filter::publish()
     rposquat.data.clear();
     rposquat.data.resize(7);
     Eigen::VectorXd::Map(&rposquat.data[0], 7) = T_raw_.coeffs();
+
     rpos_quat_pub_.publish(rposquat);
 
     if (verbose_)
     {
+        fposquat.data.push_back((double)tracker_status);
+        rposquat.data.push_back((double)tracker_status);
         flogger_ -> writeRows(fposquat.data);
         rlogger_ -> writeRows(rposquat.data);
     }

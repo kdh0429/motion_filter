@@ -28,7 +28,7 @@ PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose);
 Eigen::Isometry3d getTransform();
 Vector6d getSpatialVel() {return V_;}; //[v;w];
 Vector7d getPosQuat() {return T_.coeffs();}; //[v;w];
-void step(Eigen::Isometry3d T_m);
+void step(Eigen::Isometry3d T_m, bool tracker_status);
 void restart();
 
 private:
@@ -37,14 +37,12 @@ void predict();
 void ekfUpdate(Eigen::Isometry3d T_m);
 void isekfUpdate(Eigen::Isometry3d T_m);
 void dynamicClipUpdate(Vector6d z);
-void publish();
+void publish(bool tracker_status);
 
 ros::Publisher pose_pub_;
 ros::Publisher fpos_quat_pub_; //filter
 ros::Publisher rpos_quat_pub_; //raw
-
 ros::Publisher vel_pub_;
-
 
 int key_;
 int tracker_id_;
@@ -85,7 +83,7 @@ Vector6d gamma2_;
 //Logger
 CsvLogger* rlogger_;
 CsvLogger* flogger_;
-std::vector<std::string> keys_ = {"x", "y", "z", "qw", "qx", "qy", "qz"};
+std::vector<std::string> keys_ = {"x", "y", "z", "qw", "qx", "qy", "qz", "status"};
 std::vector<std::string> id2name_ = {"base", "chest", "larm", "lhand", "rarm", "rhand", "head"};
 };
 }

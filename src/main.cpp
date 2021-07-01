@@ -35,17 +35,15 @@ int main(int argc, char **argv)
     
 
     ros::Rate loop_rate(1.0/dt);
-    bool restart = false;
+    bool status = false;
 
-    auto func = [&](Eigen::Isometry3d* T, int i, bool restart, SE3Filter *filter)
+    auto func = [&](Eigen::Isometry3d* T, int i, bool status, PreProcess *filter)
     {
-        if (restart)
-            filters[i] -> restart();
         double flag = ((T+i)->linear()).determinant();
         // std::cout<<"index: "<<i<<" flag: "<<flag<<std::endl;
         if (fabs(flag - 1.0) < 1e-6)
         {
-            filters[i] -> step(T[i]);
+            filters[i] -> step(T[i], status);
         }
     };
 
@@ -54,12 +52,12 @@ int main(int argc, char **argv)
         Eigen::Isometry3d* T;
 
         T = dh.getObs();
-        
+        status = dh.getTrackerStatus();
         std::vector<std::thread> ts;
 
         for (int i=0;i<NUM_TRACKER + 1;i++)
         {
-            std::thread t(func, T, i, restart, filters[i]);
+            std::thread t(func, T, i, status, filters[i]);
             ts.push_back(std::move(t));
         }
 
