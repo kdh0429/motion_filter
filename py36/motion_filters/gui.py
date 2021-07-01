@@ -30,7 +30,7 @@ class MeshCatViz:
         self.prefixes = ["R", "F"]
         self.colors = ["0xfc1403", "0x034efc"]  # Red, Blue
         self.bias_y = 1.5  # TODO change to widget
-
+        self.vertices = dict()
         # setting subscriber
         self.set_subscribe()
 
@@ -39,9 +39,16 @@ class MeshCatViz:
             self.init_tracker_viz(self.viz_type)
 
     def set_subscribe(self):
+        rospy.Subscriber("/skel", Float64MultiArray, self.skel_callback)
         for i in range(NUM_TRACKER + 1):
             for j in range(2):
                 rospy.Subscriber(f"/{self.prefixes[j]}posquat{i}", Float64MultiArray, self.tracker_callback)
+
+    def skel_callback(self, msg):
+        data = np.array(msg.data, dtype=np.float64).reshape(-1, 3).T
+        self.vertices["spines"] = data[:, :6]
+        self.vertices["larm"] = data[:, 6:10]
+        self.vertices["rarm"] = data[:, 10:14]         
 
     def tracker_callback(self, msg):
         topic_name = msg._connection_header["topic"][1:]
@@ -84,7 +91,15 @@ class MeshCatViz:
     def set_transform(self, viz_type):
         for i in range(NUM_TRACKER + 1):
             self.vis[f"{self.prefixes[viz_type]}posquat{i}"].set_transform(self.tfs[f"{self.prefixes[viz_type]}posquat{i}"])
+        if len(self.vertices.keys()) >= 3:
+            self.vis["spines"].set_object(g.Line(g.PointsGeometry(self.vertices["spines"]), g.LineBasicMaterial(color="0x034efc", linewidth=10 )))
+            self.vis["spines_point"].set_object(g.PointsGeometry(self.vertices["spines"]), g.PointsMaterial(size=0.08))
 
+            self.vis["larm"].set_object(g.Line(g.PointsGeometry(self.vertices["larm"]), g.LineBasicMaterial(color="0x034efc", linewidth=10 )))
+            self.vis["larm_point"].set_object(g.PointsGeometry(self.vertices["larm"]), g.PointsMaterial(size=0.08))
+
+            self.vis["rarm"].set_object(g.Line(g.PointsGeometry(self.vertices["rarm"]), g.LineBasicMaterial(color="0x034efc", linewidth=10)))
+            self.vis["rarm_point"].set_object(g.PointsGeometry(self.vertices["rarm"]), g.PointsMaterial(size=0.08))
 
 class PlotGUI:
     def __init__(self, max_buffer, plot_hz):

@@ -25,7 +25,11 @@ VR
   # eigen_conversions
 )
 find_package(Eigen3 REQUIRED)
-include_directories(${Eigen3_INCLUDE_DIRS})
+if((NOT TARGET Eigen3::Eigen) AND (DEFINED EIGEN3_INCLUDE_DIR))
+	add_library(AliasEigen3 INTERFACE)
+	target_include_directories(AliasEigen3 INTERFACE ${EIGEN3_INCLUDE_DIR})
+	add_library(Eigen3::Eigen ALIAS AliasEigen3)
+endif()
 # Find the manif library
 find_package(manif REQUIRED)
 find_package(toml11 REQUIRED)
@@ -46,6 +50,10 @@ include_directories(
 ########
 # LIBS #
 ########
+add_library(bvh11 STATIC src/bvh11.cpp)
+target_link_libraries(bvh11 Eigen3::Eigen)
+target_include_directories(bvh11 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 add_library(logger_lib SHARED
 "src/logger.cpp"
 )
@@ -58,7 +66,7 @@ ${Boost_LIBRARIES}
 
 file(GLOB MFSRC
 "src/data_handler.cpp"
-"src/pre_process.cpp"
+"src/se3_filter.cpp"
 )
 add_library(motion_filter_lib SHARED
   ${MFSRC}
@@ -103,3 +111,14 @@ target_include_directories(mainf_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})
 add_executable(logger_test test/logger_test.cpp)
 target_link_libraries(logger_test logger_lib ${catkin_LIBRARIES})
 target_include_directories(logger_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
+
+add_executable(bvh_read test/bvh_read.cpp)
+target_link_libraries(bvh_read bvh11)
+
+add_executable(rbdl_kinematics test/rbdl_kinematics.cpp)
+target_link_libraries(rbdl_kinematics 
+rbdl
+Eigen3::Eigen
+bvh11
+${catkin_LIBRARIES}
+)

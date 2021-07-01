@@ -6,8 +6,8 @@ Data:  2021.06.21
 Autor: Donghyun Sung sdh1259@snu.ac.kr
 
 */
-#ifndef PRE_PROCESS_H
-#define PRE_PROCESS_H
+#ifndef SE3_FILTER_H
+#define SE3_FILTER_H
 
 #include "manif/SE3.h"
 #include <toml.hpp>
@@ -20,7 +20,7 @@ namespace motion_filter
 
 VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T);
 
-class PreProcess
+class SE3Filter
 {
 public:
 PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose);
@@ -89,4 +89,4 @@ std::vector<std::string> keys_ = {"x", "y", "z", "qw", "qx", "qy", "qz"};
 std::vector<std::string> id2name_ = {"base", "chest", "larm", "lhand", "rarm", "rhand", "head"};
 };
 }
-#endif // PRE_PROCESS_H
+#endif // SE3_FILTER_H

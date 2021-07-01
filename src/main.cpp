@@ -1,5 +1,5 @@
 #include <motion_filter/data_handler.hpp>
-#include <motion_filter/pre_process.hpp>
+#include <motion_filter/se3_filter.hpp>
 #include <thread>
 #include <memory>
 #include <ros/ros.h>
@@ -27,17 +27,17 @@ int main(int argc, char **argv)
     double dt = 1.0/1000.0;
 
     DataHandler dh = DataHandler(nh);
-    PreProcess *filters[NUM_TRACKER + 1];
+    SE3Filter *filters[NUM_TRACKER + 1];
     for (int i=0;i<NUM_TRACKER + 1;i++)
     {
-        filters[i] = new PreProcess(nh, i, dt, verbose);
+        filters[i] = new SE3Filter(nh, i, dt, verbose);
     }
     
 
     ros::Rate loop_rate(1.0/dt);
     bool restart = false;
 
-    auto func = [&](Eigen::Isometry3d* T, int i, bool restart, PreProcess *filter)
+    auto func = [&](Eigen::Isometry3d* T, int i, bool restart, SE3Filter *filter)
     {
         if (restart)
             filters[i] -> restart();

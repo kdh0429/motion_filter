@@ -5,7 +5,7 @@ constant velocity(differential kinematic)
 Data:  2021.06.21 
 Autor: Donghyun Sung sdh1259@snu.ac.kr
 */
-#include <motion_filter/pre_process.hpp>
+#include <motion_filter/se3_filter.hpp>
 
 namespace motion_filter
 {
@@ -33,7 +33,7 @@ VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T)
   return msg;
 }
 
-PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose)
+SE3Filter::SE3Filter(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose)
 {
     tracker_id_ = tracker_id;
     dt_ = dt;
@@ -79,12 +79,12 @@ PreProcess::PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verb
 
 }
 
-PreProcess::~PreProcess()
+SE3Filter::~SE3Filter()
 {
-    std::cout << "PreProcess Destructor" << std::endl;
+    std::cout << "SE3Filter Destructor" << std::endl;
 }
 
-Eigen::Isometry3d PreProcess::getTransform()
+Eigen::Isometry3d SE3Filter::getTransform()
 {
     Vector7d pos_quat = T_.coeffs();
     Eigen::Isometry3d T_iso;
@@ -96,7 +96,7 @@ Eigen::Isometry3d PreProcess::getTransform()
 }
 
  
-void PreProcess::step(Eigen::Isometry3d T_m)
+void SE3Filter::step(Eigen::Isometry3d T_m)
 {
     if (is_first_)
     {
@@ -117,14 +117,14 @@ void PreProcess::step(Eigen::Isometry3d T_m)
     }
     publish();
 }
-void PreProcess::restart()
+void SE3Filter::restart()
 {
     sigma_ = sigma_init_;
     epsilon_ = epsilon_init_;
     is_first_ = true;
 }
 
-void PreProcess::predict()
+void SE3Filter::predict()
 {
     // ROS_INFO("Predict");
     T_ = T_.plus(manif::SE3Tangentd(V_ * dt_), J_T_, J_V_);
@@ -139,7 +139,7 @@ void PreProcess::predict()
 
     P_ = F * P_ * F.transpose() + Q;
 }
-void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
+void SE3Filter::ekfUpdate(Eigen::Isometry3d T_m)
 {
     // ROS_INFO("Update");
     T_raw_ = manif::SE3d(T_m);
@@ -159,16 +159,16 @@ void PreProcess::ekfUpdate(Eigen::Isometry3d T_m)
     P_ = P_ - K * Z * K.transpose();
 
 }
-void PreProcess::isekfUpdate(Eigen::Isometry3d T_m)
+void SE3Filter::isekfUpdate(Eigen::Isometry3d T_m)
 {
-    ROS_INFO("Update");
+    // ROS_INFO("Update");
     // std::cout<<tracker_id_<<" Traw:\t"<<T_m.linear().determinant()<<std::endl;
 
     T_raw_ = manif::SE3d(T_m);
     Vector6d z = (T_raw_ - T_).coeffs();
     Vector6d z_clip = (z.array().min(sigma_.array().sqrt()).max(-sigma_.array().sqrt())).matrix();
-    std::cout<<tracker_id_<<" sigma_:\t"<<sigma_.array().sqrt().matrix().transpose()<<std::endl;
-    std::cout<<tracker_id_<<" z_clip:\t"<<z_clip.transpose()<<std::endl;
+    // std::cout<<tracker_id_<<" sigma_:\t"<<sigma_.array().sqrt().matrix().transpose()<<std::endl;
+    // std::cout<<tracker_id_<<" z_clip:\t"<<z_clip.transpose()<<std::endl;
     
 
     Matrix6d Z = H_ * P_ * H_.transpose() + N_;
@@ -184,12 +184,12 @@ void PreProcess::isekfUpdate(Eigen::Isometry3d T_m)
     // std::cout<<"T   :\t"<<T_.coeffs().transpose()<<std::endl;
 
 }
-void PreProcess::dynamicClipUpdate(Vector6d z)
+void SE3Filter::dynamicClipUpdate(Vector6d z)
 {
     sigma_ = (lambda1_.array() * sigma_.array() + gamma1_.array() * epsilon_.array() * Eigen::exp(-epsilon_.array())).matrix();
     epsilon_ = (lambda2_.array() * epsilon_.array() + gamma2_.array() * z.array().square()).matrix();
 }
-void PreProcess::publish()
+void SE3Filter::publish()
 {
     //VR message default
     pose_pub_.publish(isometry3d2VRmsg(getTransform()));
@@ -221,7 +221,7 @@ void PreProcess::publish()
     // vel_pub_.publish(spvel);
 
 }
-void PreProcess::parseToml(std::string &toml_path)
+void SE3Filter::parseToml(std::string &toml_path)
 {
     auto data = toml::parse(toml_path);
     //default kalman filter params
