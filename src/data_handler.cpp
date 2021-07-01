@@ -40,5 +40,17 @@ void DataHandler::trackersStatusCallback(const std_msgs::Bool &msg)
     tracker_status_ = msg.data;
     // std::cout<<tracker_status_<<std::endl;
 }
+template<class M>
+int DataHandler::addPublisher(const M &obj, std::string name, uint32_t queue_size)
+{
+    index = pubs_.size();
+    pubs_.push_back(nh_.advertise<obj>(name, queue_size));
+    return index;
+}
+template<class M>
+void DataHandler::publish(const M &obj, int index)
+{
+    pubs_.at(index).publish(obj);
+}
 
 }

@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(1.0/dt);
     bool status = false;
 
-    auto func = [&](Eigen::Isometry3d* T, int i, bool status, PreProcess *filter)
+    auto func = [&](Eigen::Isometry3d* T, int i, bool status, SE3Filter *filter)
     {
         double flag = ((T+i)->linear()).determinant();
         // std::cout<<"index: "<<i<<" flag: "<<flag<<std::endl;

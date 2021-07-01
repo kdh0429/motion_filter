@@ -23,8 +23,8 @@ VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T);
 class SE3Filter
 {
 public:
-PreProcess(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose);
-~PreProcess();
+SE3Filter(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose);
+~SE3Filter();
 Eigen::Isometry3d getTransform();
 Vector6d getSpatialVel() {return V_;}; //[v;w];
 Vector7d getPosQuat() {return T_.coeffs();}; //[v;w];

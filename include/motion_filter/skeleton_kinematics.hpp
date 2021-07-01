@@ -40,6 +40,7 @@ void printModelInfo();
 void CalibOffsets();
 
 private:
+DataHandler* dh_;
 void publish();
 bvh11::BvhObject bvh_;
 Model* model_;
