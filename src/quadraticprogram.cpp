@@ -1,27 +1,27 @@
 #include "quadraticprogram.h"
 
 CQuadraticProgram::CQuadraticProgram()
+: _num_var(1), _num_cons(1)
 {
-    Initialize();
+    _bInitialized = false;
+
 }
+
+CQuadraticProgram::CQuadraticProgram(int num_var, int num_cons)
+: _num_var(num_var), _num_cons(num_cons)
+{
+    InitializeProblemSize();
+}
+
 CQuadraticProgram::~CQuadraticProgram()
 {
 }
 
-void CQuadraticProgram::Initialize()
+void CQuadraticProgram::InitializeProblemSize()
 {
-    _bInitialized = false;
-    _num_var = 1;
-    _num_cons = 1;
-}
-
-void CQuadraticProgram::InitializeProblemSize(const int &num_var, const int &num_cons)
-{
-    _QPprob = SQProblem(num_var, num_cons);
+    _QPprob = SQProblem(_num_var, _num_cons);
     _bool_constraint_Ax = false;
     _bool_constraint_x = false;
-    _num_var = num_var;
-    _num_cons = num_cons;
     _H.resize(_num_var, _num_var);
     _H.setZero();
     _g.resize(_num_var);

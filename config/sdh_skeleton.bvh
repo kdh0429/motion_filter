@@ -1,0 +1,67 @@
+HIERARCHY
+ROOT Thorax
+{
+    OFFSET 0.0 0.0 0.0
+    CHANNELS 3 Zrotation Yrotation Xrotation
+    JOINT Neck
+    {
+        OFFSET 0.0 0.0 0.15
+        CHANNELS 3 Zrotation Yrotation Xrotation
+        End Site
+        {
+            OFFSET 0.0 0.0 0.10
+        }
+    }
+    JOINT LeftShoulder
+    {
+        OFFSET 0 0 0
+        CHANNELS 3 Zrotation Yrotation Xrotation
+        JOINT LeftArm
+        {
+            OFFSET -0.15 -0.18 0.245
+            CHANNELS 3 Zrotation Yrotation Xrotation
+            JOINT LeftElbow
+            {
+                OFFSET 0.0 -0.285 0.0
+                CHANNELS 3 Zrotation Yrotation Xrotation
+                JOINT LeftWrist
+                {
+                    OFFSET 0.0 -0.285 0.0
+                    CHANNELS 3 Zrotation Yrotation Xrotation
+                    End Site
+                    {
+                        OFFSET 0.0 -0.05 0.05
+                    }								
+                }
+            }
+        }
+    }
+    JOINT RightShoulder
+    {
+        OFFSET 0 0 0
+        CHANNELS 3 Zrotation Yrotation Xrotation
+        JOINT RightArm
+        {
+            OFFSET -0.15 0.18 0.245
+            CHANNELS 3 Zrotation Yrotation Xrotation
+            JOINT RightElbow
+            {
+                OFFSET 0.0 0.285 0.0
+                CHANNELS 3 Zrotation Yrotation Xrotation
+                JOINT RightWrist
+                {
+                    OFFSET 0.0 0.285 0.0
+                    CHANNELS 3 Zrotation Yrotation Xrotation
+                    End Site
+                    {
+                        OFFSET 0.0 0.05 0.05
+                    }
+                }
+            }
+        }
+    }
+}
+MOTION
+Frames: 1
+Frame Time: .0083333
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

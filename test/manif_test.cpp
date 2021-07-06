@@ -23,7 +23,7 @@ static Eigen::Vector3d getPhi(Eigen::Matrix3d current_rotation,
 
 int main()
 {
-    std::srand((unsigned int) time(0));
+    // std::srand((unsigned int) time(0));
 
     auto state = manif::SE3d::Identity();
     std::cout<< state.coeffs().transpose()<<std::endl;
