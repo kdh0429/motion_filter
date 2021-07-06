@@ -235,20 +235,20 @@ namespace bvh11
                     
                     const std::shared_ptr<Joint> current_joint = stack.back();
                     current_joint->has_end_site() = true;
+                    
                     // Read the next line, which should be "{"
                     const std::vector<std::string> tokens_begin_block = internal::tokenize_next_line(ifs);
                     assert(tokens_begin_block.size() == 1 && "Found two or more tokens");
                     assert(tokens_begin_block[0] == "{" && "Could not find an expected '{'");
-                    std::cout<<"found {";
+
                     // Read the next line, which should state an offset
                     const std::vector<std::string> tokens_offset = internal::tokenize_next_line(ifs);
                     current_joint->end_site() = scale * internal::read_offset(tokens_offset);
-                    std::cout<<" offset";
+
                     // Read the next line, which should be "{"
                     const std::vector<std::string> tokens_end_block = internal::tokenize_next_line(ifs);
                     assert(tokens_end_block.size() == 1 && "Found two or more tokens");
                     assert(tokens_end_block[0] == "}" && "Could not find an expected '}'");
-                    std::cout<<" found {"<<std::endl;
                 }
                 // Finish to create a joint
                 else if (tokens[0] == "}")

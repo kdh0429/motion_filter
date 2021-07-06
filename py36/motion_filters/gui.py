@@ -46,9 +46,10 @@ class MeshCatViz:
 
     def skel_callback(self, msg):
         data = np.array(msg.data, dtype=np.float64).reshape(-1, 3).T
-        self.vertices["spines"] = data[:, :6]
-        self.vertices["larm"] = data[:, 6:10]
-        self.vertices["rarm"] = data[:, 10:14]         
+        # print(data.shape)
+        self.vertices["spines"] = data[:, :3]
+        self.vertices["larm"] = data[:, 3:8]
+        self.vertices["rarm"] = data[:, 8:13]         
 
     def tracker_callback(self, msg):
         topic_name = msg._connection_header["topic"][1:]
@@ -89,17 +90,18 @@ class MeshCatViz:
  
 
     def set_transform(self, viz_type):
+        size = 0.02
         for i in range(NUM_TRACKER + 1):
             self.vis[f"{self.prefixes[viz_type]}posquat{i}"].set_transform(self.tfs[f"{self.prefixes[viz_type]}posquat{i}"])
         if len(self.vertices.keys()) >= 3:
             self.vis["spines"].set_object(g.Line(g.PointsGeometry(self.vertices["spines"]), g.LineBasicMaterial(color="0x034efc", linewidth=10 )))
-            self.vis["spines_point"].set_object(g.PointsGeometry(self.vertices["spines"]), g.PointsMaterial(size=0.08))
+            self.vis["spines_point"].set_object(g.PointsGeometry(self.vertices["spines"]), g.PointsMaterial(size=size))
 
             self.vis["larm"].set_object(g.Line(g.PointsGeometry(self.vertices["larm"]), g.LineBasicMaterial(color="0x034efc", linewidth=10 )))
-            self.vis["larm_point"].set_object(g.PointsGeometry(self.vertices["larm"]), g.PointsMaterial(size=0.08))
+            self.vis["larm_point"].set_object(g.PointsGeometry(self.vertices["larm"]), g.PointsMaterial(size=size))
 
             self.vis["rarm"].set_object(g.Line(g.PointsGeometry(self.vertices["rarm"]), g.LineBasicMaterial(color="0x034efc", linewidth=10)))
-            self.vis["rarm_point"].set_object(g.PointsGeometry(self.vertices["rarm"]), g.PointsMaterial(size=0.08))
+            self.vis["rarm_point"].set_object(g.PointsGeometry(self.vertices["rarm"]), g.PointsMaterial(size=size))
 
 class PlotGUI:
     def __init__(self, max_buffer, plot_hz):

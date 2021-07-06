@@ -10,29 +10,6 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 namespace motion_filter
 {
 
-VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T)
-{
-  Eigen::Matrix4d T_mat = T.matrix();
-
-  VR::matrix_3_4 msg;
-
-  Eigen::RowVector4d rv1, rv2, rv3;
-  rv1 = T_mat.block(0, 0, 1, 4);
-  rv2 = T_mat.block(1, 0, 1, 4);
-  rv3 = T_mat.block(2, 0, 1, 4);
-  
-
-  std::vector<double> r1(&rv1[0], rv1.data() + rv1.cols()*rv1.rows());
-  std::vector<double> r2(&rv2[0], rv2.data() + rv2.cols()*rv2.rows());
-  std::vector<double> r3(&rv3[0], rv3.data() + rv3.cols()*rv3.rows());
-  
-  msg.firstRow = r1;
-  msg.secondRow = r2;
-  msg.thirdRow = r3;
-
-  return msg;
-}
-
 SE3Filter::SE3Filter(ros::NodeHandle &nh, int tracker_id, double dt, bool verbose)
 {
     tracker_id_ = tracker_id;

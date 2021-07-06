@@ -13,13 +13,11 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 #include <toml.hpp>
 #include <ros/package.h>
 #include <motion_filter/type_def.hpp>
+#include <motion_filter/data_handler.hpp>
 #include <std_msgs/Float64MultiArray.h>
 
 namespace motion_filter
 {
-
-VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T);
-
 class SE3Filter
 {
 public:

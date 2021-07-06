@@ -54,7 +54,11 @@ add_library(bvh11 STATIC src/bvh11.cpp)
 target_link_libraries(bvh11 Eigen3::Eigen)
 target_include_directories(bvh11 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(logger_lib SHARED
+add_library(qp_lib STATIC src/quadraticprogram.cpp)
+target_link_libraries(qp_lib Eigen3::Eigen qpOASES)
+target_include_directories(qp_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+add_library(logger_lib STATIC
 "src/logger.cpp"
 )
 target_include_directories(logger_lib SYSTEM PUBLIC 
@@ -67,16 +71,20 @@ ${Boost_LIBRARIES}
 file(GLOB MFSRC
 "src/data_handler.cpp"
 "src/se3_filter.cpp"
+"src/skeleton_kinematics.cpp"
 )
-add_library(motion_filter_lib SHARED
+add_library(motion_filter_lib STATIC
   ${MFSRC}
 )
 target_link_libraries(motion_filter_lib
+  qp_lib
+  rbdl
   ${catkin_LIBRARIES}
   ${Eigen3_LIBRARIES}
   ${toml11_LIBRARIES}
   ${manif_LIBRARIES}
   logger_lib
+  bvh11
   )
 
 target_include_directories(motion_filter_lib SYSTEM PUBLIC 
@@ -119,6 +127,12 @@ add_executable(rbdl_kinematics test/rbdl_kinematics.cpp)
 target_link_libraries(rbdl_kinematics 
 rbdl
 Eigen3::Eigen
-bvh11
+motion_filter_lib
+${catkin_LIBRARIES}
+)
+
+add_executable(data_handler_test test/data_handler_test.cpp)
+target_link_libraries(data_handler_test 
+motion_filter_lib
 ${catkin_LIBRARIES}
 )

@@ -8,6 +8,7 @@
 
 namespace motion_filter
 {
+VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T);
 
 class DataHandler
 {
@@ -30,10 +31,13 @@ void hmdCallback(const VR::matrix_3_4 &msg);
 void trackersStatusCallback(const std_msgs::Bool & msg);
 Eigen::Isometry3d* getObs() {return raw_poses_;};
 bool getTrackerStatus() {return tracker_status_;};
-template<class M>
-int addPublisher(const M &obj, std::string name, uint32_t queue_size);
-template<class M>
-void publish(const M &obj, int index);
+
+template<typename M>
+int addPublisher(std::string name, uint32_t queue_size);
+
+template<typename M>
+void publish(M &message, int index);
+
 private:
 ros::NodeHandle &nh_;
 ros::Subscriber trackers_sub_[NUM_TRACKER];
@@ -46,6 +50,20 @@ Eigen::Isometry3d raw_poses_[NUM_TRACKER + 1]; //pelvis, chect, lelbow, lhand, r
 bool tracker_status_ = false;
 
 };
+
+template<typename M>
+int DataHandler::addPublisher(std::string name, uint32_t queue_size)
+{
+    int index = pubs_.size();
+    pubs_.push_back(nh_.advertise<M>(name, queue_size));
+    return index;
+}
+template<typename M>
+void DataHandler::publish(M &message, int index)
+{
+    pubs_.at(index).publish(message);
+}
+
 }
 
 #endif // DATA_HANDLER_H

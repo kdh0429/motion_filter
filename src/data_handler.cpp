@@ -2,6 +2,29 @@
 
 namespace motion_filter
 {
+VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T)
+{
+  Eigen::Matrix4d T_mat = T.matrix();
+
+  VR::matrix_3_4 msg;
+
+  Eigen::RowVector4d rv1, rv2, rv3;
+  rv1 = T_mat.block(0, 0, 1, 4);
+  rv2 = T_mat.block(1, 0, 1, 4);
+  rv3 = T_mat.block(2, 0, 1, 4);
+  
+
+  std::vector<double> r1(&rv1[0], rv1.data() + rv1.cols()*rv1.rows());
+  std::vector<double> r2(&rv2[0], rv2.data() + rv2.cols()*rv2.rows());
+  std::vector<double> r3(&rv3[0], rv3.data() + rv3.cols()*rv3.rows());
+  
+  msg.firstRow = r1;
+  msg.secondRow = r2;
+  msg.thirdRow = r3;
+
+  return msg;
+}
+
 void DataHandler::trackersCallback(const ros::MessageEvent<VR::matrix_3_4>& event)
 {
     const ros::M_string& header = event.getConnectionHeader();
@@ -40,17 +63,4 @@ void DataHandler::trackersStatusCallback(const std_msgs::Bool &msg)
     tracker_status_ = msg.data;
     // std::cout<<tracker_status_<<std::endl;
 }
-template<class M>
-int DataHandler::addPublisher(const M &obj, std::string name, uint32_t queue_size)
-{
-    index = pubs_.size();
-    pubs_.push_back(nh_.advertise<obj>(name, queue_size));
-    return index;
-}
-template<class M>
-void DataHandler::publish(const M &obj, int index)
-{
-    pubs_.at(index).publish(obj);
-}
-
 }
