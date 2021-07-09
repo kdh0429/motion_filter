@@ -26,7 +26,7 @@ with open(file,"r") as f:
             for word in words:
                 if isDigit(word):
                     # print("here")
-                    new_line += [str(float64(word)*0.00152)]
+                    new_line += [str(float64(word)*0.00052)]
                 else:
                     new_line += [word]
             new_file.write(" ".join(new_line)+"\n")
