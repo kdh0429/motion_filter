@@ -1,0 +1,24 @@
+title="Skeleton Kinematics Config"
+
+bvh_file="sdh_skeleton_rigid.bvh"
+# bvh_file="sdh_skeleton.bvh"
+
+#thorax, lshoulder, lhand, rshoulder, rhead
+target_index = [1, 3, 5, 6, 8, 2] # shoulder rigid.bvh in rbdl model
+# target_index = [1, 4, 6, 8, 10, 2] # shoulder dof.bvh in rbdl model
+
+solver="lsq" #huber
+
+[gains] #ang, lin
+hand = [20.0, 100.0] 
+shoulder = [20.0, 100.0]
+thorax = [20.0, 100.0]
+
+[tracker_offsets] #local offset x y z (m)
+thorax = [0.15, 0.0, 0.49]
+lshoulder = [0.0, 0.15, 0.08]
+lhand = [0.0, 0.04, 0.08]
+rshoulder = [0.0, -0.15, 0.08]
+rhand = [0.0, -0.04, 0.08]
+
+head = [0.0, 0.0, 0.0]

@@ -1,5 +1,5 @@
 HIERARCHY
-ROOT Thorax
+ROOT Spine
 {
     OFFSET 0.0 0.0 0.0
     CHANNELS 3 Zrotation Yrotation Xrotation
@@ -14,23 +14,23 @@ ROOT Thorax
     }
     JOINT LeftShoulder
     {
-        OFFSET 0 0 0
+        OFFSET 0.0 0 0.735
         CHANNELS 3 Zrotation Yrotation Xrotation
         JOINT LeftArm
         {
-            OFFSET -0.15 -0.18 0.245
+            OFFSET 0.0 0.18 0.0
             CHANNELS 3 Zrotation Yrotation Xrotation
             JOINT LeftElbow
             {
-                OFFSET 0.0 -0.285 0.0
+                OFFSET 0.0 0.28 0.0
                 CHANNELS 3 Zrotation Yrotation Xrotation
                 JOINT LeftWrist
                 {
-                    OFFSET 0.0 -0.285 0.0
+                    OFFSET 0.0 0.28 0.0
                     CHANNELS 3 Zrotation Yrotation Xrotation
                     End Site
                     {
-                        OFFSET 0.0 -0.05 0.05
+                        OFFSET 0.0 0.04 0.00
                     }								
                 }
             }
@@ -38,23 +38,23 @@ ROOT Thorax
     }
     JOINT RightShoulder
     {
-        OFFSET 0 0 0
+        OFFSET 0.0 0 0.735
         CHANNELS 3 Zrotation Yrotation Xrotation
         JOINT RightArm
         {
-            OFFSET -0.15 0.18 0.245
+            OFFSET 0.0 -0.18 0.0
             CHANNELS 3 Zrotation Yrotation Xrotation
             JOINT RightElbow
             {
-                OFFSET 0.0 0.285 0.0
+                OFFSET 0.0 -0.285 0.0
                 CHANNELS 3 Zrotation Yrotation Xrotation
                 JOINT RightWrist
                 {
-                    OFFSET 0.0 0.285 0.0
+                    OFFSET 0.0 -0.285 0.0
                     CHANNELS 3 Zrotation Yrotation Xrotation
                     End Site
                     {
-                        OFFSET 0.0 0.05 0.05
+                        OFFSET 0.0 -0.04 0.00
                     }
                 }
             }
@@ -64,4 +64,4 @@ ROOT Thorax
 MOTION
 Frames: 1
 Frame Time: .0083333
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 

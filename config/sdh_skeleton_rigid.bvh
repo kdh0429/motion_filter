@@ -1,0 +1,59 @@
+HIERARCHY
+ROOT Spine
+{
+    OFFSET 0.0 0.0 0.0
+    CHANNELS 3 Zrotation Yrotation Xrotation
+    JOINT Neck
+    {
+        OFFSET 0.0 0.0 0.15
+        CHANNELS 3 Zrotation Yrotation Xrotation
+        End Site
+        {
+            OFFSET 0.0 0.0 0.10
+        }
+    }
+	JOINT LeftArm
+	{
+		OFFSET 0.0 0.18 0.735
+		CHANNELS 3 Zrotation Yrotation Xrotation
+		JOINT LeftElbow
+		{
+			OFFSET 0.0 0.28 0.0
+			CHANNELS 1 Zrotation
+			JOINT LeftWrist
+			{
+				OFFSET 0.0 0.28 0.0
+				CHANNELS 3 Zrotation Yrotation Xrotation
+				End Site
+				{
+					OFFSET 0.0 0.04 0.00
+				}								
+			}
+		}
+	}
+
+	JOINT RightArm
+	{
+		OFFSET 0.0 -0.18 0.735
+		CHANNELS 3 Zrotation Yrotation Xrotation
+		JOINT RightElbow
+		{
+			OFFSET 0.0 -0.285 0.0
+			CHANNELS 1 Zrotation
+			JOINT RightWrist
+			{
+				OFFSET 0.0 -0.285 0.0
+				CHANNELS 3 Zrotation Yrotation Xrotation
+				End Site
+				{
+					OFFSET 0.0 -0.04 0.00
+				}
+			}
+		}
+	}
+    
+}
+MOTION
+Frames: 1
+Frame Time: .0083333
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
