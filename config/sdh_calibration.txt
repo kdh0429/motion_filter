@@ -1,8 +1,0 @@
-sdh
-left right order
-lower_arm_length  0.285 0.285
-upper_arm_length  0.285 0.285
-shoulder_width 0.33
-hand marker offset 0.05, 0.05
-shoulder_xyz_chest -0.15 0.18 0.245 
-upperarm tracker offset(y) 0.15
