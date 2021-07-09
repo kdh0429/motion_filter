@@ -21,11 +21,10 @@ class CQuadraticProgram
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 public:
   CQuadraticProgram();
-  CQuadraticProgram(int num_var, int num_cons);
   virtual ~CQuadraticProgram();
 
 public:
-  void InitializeProblemSize();
+  void InitializeProblemSize(const int &num_var, const int &num_cons);
   void UpdateMinProblem(const MatrixXd &H, const VectorXd &g);
   void UpdateSubjectToAx(const MatrixXd &A, const VectorXd &lbA, const VectorXd &ubA);
   void UpdateSubjectToX(const VectorXd &lb, const VectorXd &ub);
@@ -43,8 +42,8 @@ private:
   SQProblem _QPprob;
   Options _options;
   bool _bInitialized;
-  const int _num_var;
-  const int _num_cons;
+  int _num_var;
+  int _num_cons;
   MatrixXd _H;
   VectorXd _g;
   bool _bool_constraint_Ax;
@@ -54,6 +53,8 @@ private:
   bool _bool_constraint_x;
   VectorXd _lb;
   VectorXd _ub;
+
+  void Initialize();
 };
 
 #endif //QUADRATICPROGRAM_H

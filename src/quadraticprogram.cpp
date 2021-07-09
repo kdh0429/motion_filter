@@ -1,27 +1,28 @@
 #include "quadraticprogram.h"
 
+
 CQuadraticProgram::CQuadraticProgram()
-: _num_var(1), _num_cons(1)
 {
-    _bInitialized = false;
-
+    Initialize();
 }
-
-CQuadraticProgram::CQuadraticProgram(int num_var, int num_cons)
-: _num_var(num_var), _num_cons(num_cons)
-{
-    InitializeProblemSize();
-}
-
 CQuadraticProgram::~CQuadraticProgram()
 {
 }
 
-void CQuadraticProgram::InitializeProblemSize()
+void CQuadraticProgram::Initialize()
 {
-    _QPprob = SQProblem(_num_var, _num_cons);
+    _bInitialized = false;
+    _num_var = 1;
+    _num_cons = 1;
+}
+
+void CQuadraticProgram::InitializeProblemSize(const int &num_var, const int &num_cons)
+{
+    _QPprob = SQProblem(num_var, num_cons);
     _bool_constraint_Ax = false;
     _bool_constraint_x = false;
+    _num_var = num_var;
+    _num_cons = num_cons;
     _H.resize(_num_var, _num_var);
     _H.setZero();
     _g.resize(_num_var);
@@ -145,34 +146,34 @@ void CQuadraticProgram::DisableEqualityCondition()
 int CQuadraticProgram::SolveQPoases(const int &num_max_iter, VectorXd &solv, bool MPC)
 {
     //translate eigen to real_t formulation
-    real_t H_realt[_num_var * _num_var]; // H in min eq 1/2x'Hx + x'g
+    real_t * H_realt = new real_t[_num_var * _num_var]; // H in min eq 1/2x'Hx + x'g
     Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(H_realt, _num_var, _num_var) = _H;
-    real_t g_realt[_num_var]; // g in min eq 1/2x'Hx + x'g
+    real_t * g_realt = new real_t[_num_var]; // g in min eq 1/2x'Hx + x'g
     Eigen::VectorXd::Map(g_realt, _num_var) = _g;
-    real_t A_realt[_num_cons * _num_var]; // A in s.t. eq lbA<= Ax <=ubA
+    real_t * A_realt = new real_t[_num_cons * _num_var]; // A in s.t. eq lbA<= Ax <=ubA
     if (_bool_constraint_Ax == true)
     {
         Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(A_realt, _num_cons, _num_var) = _A;
     }
 
-    real_t lbA_realt[_num_cons]; // lbA in s.t. eq lbA<= Ax <=ubA
+    real_t * lbA_realt = new real_t[_num_cons]; // lbA in s.t. eq lbA<= Ax <=ubA
     if (_bool_constraint_Ax == true)
     {
         Eigen::VectorXd::Map(lbA_realt, _num_cons) = _lbA;
     }
 
-    real_t ubA_realt[_num_cons]; // ubA in s.t. eq lbA<= Ax <=ubA
+    real_t * ubA_realt = new real_t[_num_cons]; // ubA in s.t. eq lbA<= Ax <=ubA
     if (_bool_constraint_Ax == true)
     {
         Eigen::VectorXd::Map(ubA_realt, _num_cons) = _ubA;
     }
-    real_t lb_realt[_num_var]; //lb in s.t. eq lb <= x <= ub
+    real_t * lb_realt = new real_t[_num_var]; //lb in s.t. eq lb <= x <= ub
     if (_bool_constraint_x == true)
     {
         Eigen::VectorXd::Map(lb_realt, _num_var) = _lb;
     }
 
-    real_t ub_realt[_num_var]; //ub in s.t. eq lb <= x <= ub
+    real_t * ub_realt = new real_t[_num_var]; //ub in s.t. eq lb <= x <= ub
     if (_bool_constraint_x == true)
     {
         Eigen::VectorXd::Map(ub_realt, _num_var) = _ub;
@@ -238,7 +239,7 @@ int CQuadraticProgram::SolveQPoases(const int &num_max_iter, VectorXd &solv, boo
         //PrintSubjectTox();
     }
 
-    real_t Xopt_realt[_num_var];
+    real_t * Xopt_realt = new real_t[_num_var];
     returnValue scs = _QPprob.getPrimalSolution(Xopt_realt);
 
     if (scs != SUCCESSFUL_RETURN)
@@ -282,7 +283,7 @@ int CQuadraticProgram::SolveQPoases(const int &num_max_iter, VectorXd &solv, boo
 VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
 {
     //translate eigen to real_t formulation
-    real_t H_realt[_num_var * _num_var]; // H in min eq 1/2x'Hx + x'g
+    real_t * H_realt = new real_t[_num_var * _num_var]; // H in min eq 1/2x'Hx + x'g
     for (int i = 0; i < _num_var; i++)
     {
         for (int j = 0; j < _num_var; j++)
@@ -291,13 +292,13 @@ VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
         }
     }
 
-    real_t g_realt[_num_var]; // g in min eq 1/2x'Hx + x'g
+    real_t * g_realt = new real_t[_num_var]; // g in min eq 1/2x'Hx + x'g
     for (int i = 0; i < _num_var; i++)
     {
         g_realt[i] = _g(i);
     }
 
-    real_t A_realt[_num_cons * _num_var]; // A in s.t. eq lbA<= Ax <=ubA
+    real_t * A_realt = new real_t[_num_cons * _num_var]; // A in s.t. eq lbA<= Ax <=ubA
     if (_bool_constraint_Ax == true)
     {
         for (int i = 0; i < _num_var; i++)
@@ -309,7 +310,7 @@ VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
         }
     }
 
-    real_t lbA_realt[_num_cons]; // lbA in s.t. eq lbA<= Ax <=ubA
+    real_t * lbA_realt = new real_t[_num_cons]; // lbA in s.t. eq lbA<= Ax <=ubA
     if (_bool_constraint_Ax == true)
     {
         for (int i = 0; i < _num_cons; i++)
@@ -318,7 +319,7 @@ VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
         }
     }
 
-    real_t ubA_realt[_num_cons]; // ubA in s.t. eq lbA<= Ax <=ubA
+    real_t * ubA_realt = new real_t[_num_cons]; // ubA in s.t. eq lbA<= Ax <=ubA
     if (_bool_constraint_Ax == true)
     {
         for (int i = 0; i < _num_cons; i++)
@@ -326,7 +327,7 @@ VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
             ubA_realt[i] = _ubA(i);
         }
     }
-    real_t lb_realt[_num_var]; //lb in s.t. eq lb <= x <= ub
+    real_t * lb_realt = new real_t[_num_var]; //lb in s.t. eq lb <= x <= ub
     if (_bool_constraint_x == true)
     {
         for (int i = 0; i < _num_var; i++)
@@ -335,7 +336,7 @@ VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
         }
     }
 
-    real_t ub_realt[_num_var]; //ub in s.t. eq lb <= x <= ub
+    real_t * ub_realt = new real_t[_num_var]; //ub in s.t. eq lb <= x <= ub
     if (_bool_constraint_x == true)
     {
         for (int i = 0; i < _num_var; i++)
@@ -400,7 +401,7 @@ VectorXd CQuadraticProgram::SolveQPoases(const int &num_max_iter, bool MPC)
         std::cout << "QP solve error from hotstart" << std::endl;
     }
 
-    real_t Xopt_realt[_num_var];
+    real_t * Xopt_realt = new real_t[_num_var];
     returnValue scs = _QPprob.getPrimalSolution(Xopt_realt);
 
     if (scs != SUCCESSFUL_RETURN)
