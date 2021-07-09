@@ -15,6 +15,8 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 #include <rbdl/rbdl.h>
 #include <rbdl/rbdl_utils.h>
 
+#include <toml.hpp>
+
 #include <Eigen/Dense>
 
 #include <std_msgs/Float64MultiArray.h>
@@ -28,16 +30,18 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 using namespace RigidBodyDynamics;
 using namespace Eigen;
 
-#define NUM_BODY 10
-// Model Index
-#define HEAD 2
-#define THORAX 1
+// Order of model id we want
+typedef enum ModelMap
+{
+    THORAX = 0,
+    LSH,
+    LHAND,
+    RSH,
+    RHAND,
+    HEAD
 
-#define LHAND 6
-#define RHAND 10
+} ModelMap;
 
-#define LSH 5
-#define RSH 9
 #define MAX 10.0
 #define MAX_ITER 100.0
 
@@ -78,16 +82,23 @@ SkeletonKinectmatics(DataHandler &dh);
 // void CalibOffsets();
 void publish();
 void solveIK();
+
 private:
 void initParams();
+void parseToml(std::string &toml_path);
 void constructJoint(bvh11::BvhObject bvh);
 void constructModel();
 void computeJacobians();
 void updateKinematics(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot);
 Eigen::Isometry3d* getCurrentTransform();
+void lsqIK();
+void huberIK();
+
+std::string solver_type_;
+std::string bvh_file_;
 
 DataHandler &dh_;
-//offsets
+//init offsets
 Eigen::Isometry3d T_base_init_;
 Eigen::Quaterniond R_inits_[6]; //same order as target indicies
 
@@ -95,11 +106,14 @@ bool is_first_ = true;
 int skel_pub_ind_;
 int rpose_pub_ind_[NUM_TRACKER + 1];
 int num_task_;
+int num_body_;
 
 Model* model_;
 
 std::vector<CustomJoint> custom_joints_;
-std::vector<Eigen::Vector3d> end_effectors_; //head larm rarm
+std::vector<Eigen::Vector3d> end_effectors_;  //head larm rarm
+std::map<std::string, Eigen::Vector3d> marker_offsets_;
+std::map<std::string, std::vector<double>> gains_;
 
 Math::VectorNd current_q_;
 Math::VectorNd current_qdot_;
@@ -108,8 +122,7 @@ Math::VectorNd prev_q_;
 Math::VectorNd prev_qdot_;
 
 std::vector<Math::MatrixNd> jacs_; //thorax_jac_, lshoulder_jac, lhand_jac, rshoulder_jac, rhand_jac, head;
-std::vector<int> target_indices_ = {THORAX, LSH, LHAND, RSH, RHAND, HEAD}; //model id in tracker order;
-
+std::vector<int> target_indices_; //model id in tracker order;
 
 CQuadraticProgram qp_;
 };
