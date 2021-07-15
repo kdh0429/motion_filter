@@ -293,15 +293,18 @@ void HuberKinect::solveIK()
         MatrixXd Hess;
         VectorXd grad;
         VectorXd onesT(num_task_);
+
+        double close_coeff = 0.0;
         onesT.setConstant(1.0);
 
         Hess.setZero(model_->dof_count + num_task_ * 3, model_->dof_count + num_task_ * 3);
         grad.setZero(model_->dof_count + num_task_ * 3);
 
-        Hess.block(0, 0, model_->dof_count, model_->dof_count) = 0.001*MatrixXd::Identity(model_->dof_count, model_->dof_count); //ridge
+        Hess.block(0, 0, model_->dof_count, model_->dof_count) = close_coeff * MatrixXd::Identity(model_->dof_count, model_->dof_count); //ridge
         Hess.block(model_->dof_count, model_->dof_count, num_task_, num_task_) = MatrixXd::Identity(num_task_, num_task_); //objective
 
         grad.setZero(model_->dof_count + num_task_ * 3);
+        grad.head(model_-> dof_count) = - close_coeff * current_qdot_;
         grad.segment(model_->dof_count + num_task_, num_task_) = gamma_ * onesT;
         grad.tail(num_task_) = gamma_ * onesT;
 
