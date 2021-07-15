@@ -1,5 +1,8 @@
 #include <manif/manif.h>
 #include <Eigen/Dense>
+#include <iostream>
+#include <chrono>
+
 
 using namespace Eigen;
 
@@ -23,7 +26,7 @@ static Eigen::Vector3d getPhi(Eigen::Matrix3d current_rotation,
 
 int main()
 {
-    // std::srand((unsigned int) time(0));
+    std::srand((unsigned int) time(0));
 
     auto state = manif::SE3d::Identity();
     std::cout<< state.coeffs().transpose()<<std::endl;
@@ -49,5 +52,26 @@ int main()
     std::cout<<"angleaxis(global) : "<< aaglobal.angle() * aaglobal.axis().transpose()<<std::endl;
     std::cout<<"scale             : "<< -getPhi(R2, R1).transpose().array() /  (aaglobal.angle() * aaglobal.axis().transpose()).array()<<std::endl;
 
+
+    std::cout<<"local approximation ---------------------------------------"<<std::endl;
+
+
+    auto T = manif::SE3d::Random();
+    auto dtau = manif::SE3Tangentd::Random()*0.1;
+
+    std::cout<<(T.rplus(dtau)).log().coeffs().transpose()<<std::endl;
+
+    manif::SE3d::Jacobian J_T, J_tau;
+
+    VectorXd tau = T.log().coeffs();
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    manif::SE3d::Identity().rplus(T.log(), J_T, J_tau);
+    // manif::SE3d::Identity().rplus(T.log());
+    std::cout<<(tau + J_tau.inverse()* dtau.coeffs()).transpose()<<std::endl;
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+    std::cout<<(tau + dtau.coeffs()).transpose()<<std::endl;
+    
+    
 
 }

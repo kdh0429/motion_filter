@@ -50,7 +50,7 @@ int main(int argc, char** argv)
             if(status[mode - 1] == false)
             {
                 std::cout<<mode<<std::endl;
-                Eigen::Isometry3d* T = dh.getObs();
+                Eigen::Isometry3d* T = dh.getRaw();
                 
                 VectorKd eig_data;
                 eig_data.head(3) = T[3].translation() - T[1].translation();

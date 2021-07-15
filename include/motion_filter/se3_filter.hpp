@@ -5,6 +5,7 @@ constant velocity(differential kinematic)
 Data:  2021.06.21 
 Autor: Donghyun Sung sdh1259@snu.ac.kr
 
+Add LowPass Filter in SE3
 */
 #ifndef SE3_FILTER_H
 #define SE3_FILTER_H
@@ -28,7 +29,8 @@ Vector6d getSpatialVel() {return V_;}; //[v;w];
 Vector7d getPosQuat() {return T_.coeffs();}; //[v;w];
 void step(Eigen::Isometry3d T_m, bool tracker_status);
 void restart();
-
+int getId(){return tracker_id_;};
+double getTimeStep(){return dt_;};
 private:
 void parseToml(std::string &toml_path);
 void predict();
@@ -36,7 +38,7 @@ void ekfUpdate(Eigen::Isometry3d T_m);
 void isekfUpdate(Eigen::Isometry3d T_m);
 void dynamicClipUpdate(Vector6d z);
 void publish(bool tracker_status);
-
+void lpf(Eigen::Isometry3d T_m);
 ros::Publisher pose_pub_;
 ros::Publisher fpos_quat_pub_; //filter
 ros::Publisher rpos_quat_pub_; //raw
@@ -44,11 +46,12 @@ ros::Publisher vel_pub_;
 
 int key_;
 int tracker_id_;
-const char* algo[2] = {"LGEKF", "LGISEKF"};
+const char* algo[3] = {"LGEKF", "LGISEKF", "LPF"};
 
 double dt_;
 
 bool verbose_;
+bool is_publish_;
 bool is_first_ = true;
 //state variable
 manif::SE3d T_;
@@ -77,6 +80,8 @@ Vector6d lambda1_;
 Vector6d lambda2_;
 Vector6d gamma1_;
 Vector6d gamma2_;
+
+double alpha_;
 
 //Logger
 CsvLogger* rlogger_;

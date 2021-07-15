@@ -5,8 +5,8 @@ Data:  2021.07.01
 Autor: Donghyun Sung sdh1259@snu.ac.kr
 
 */
-#ifndef SKELETON_KINMEMATICS_H
-#define SKELETON_KINMEMATICS_H
+#ifndef SKELETON_KINMEMATICS_BASE_H
+#define SKELETON_KINMEMATICS_BASE_H
 #include <manif/SE3.h>
 #include <manif/SO3.h>
 
@@ -25,7 +25,11 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 
 #include "motion_filter/data_handler.hpp"
 #include "motion_filter/type_def.hpp"
+#include "motion_filter/kalman_filter.hpp"
+
 #include "quadraticprogram.h"
+
+#include "logger.h"
 
 using namespace RigidBodyDynamics;
 using namespace Eigen;
@@ -42,8 +46,9 @@ typedef enum ModelMap
 
 } ModelMap;
 
-#define MAX 10.0
+#define MAX 100.0
 #define MAX_ITER 100.0
+#define INF std::numeric_limits<double>::infinity()
 
 namespace motion_filter
 {
@@ -81,38 +86,25 @@ SkeletonKinectmatics(DataHandler &dh);
 // void printModelInfo();
 // void CalibOffsets();
 void publish();
-void solveIK();
+void step();
+double getTimeStep(){return h_;};
 
-private:
-void initParams();
-void parseToml(std::string &toml_path);
-void constructJoint(bvh11::BvhObject bvh);
+protected:
 void constructModel();
+void constructJoint(bvh11::BvhObject bvh);
 void computeJacobians();
+void computeJacobians(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot);
 void updateKinematics(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot);
 Eigen::Isometry3d* getCurrentTransform();
-void lsqIK();
-void huberIK();
+Eigen::Isometry3d* getCurrentTransform(const Eigen::VectorXd& q);
 
-std::string solver_type_;
-std::string bvh_file_;
+std::shared_ptr<Model> model_;
 
-DataHandler &dh_;
-//init offsets
 Eigen::Isometry3d T_base_init_;
 Eigen::Quaterniond R_inits_[6]; //same order as target indicies
 
 bool is_first_ = true;
-int skel_pub_ind_;
-int rpose_pub_ind_[NUM_TRACKER + 1];
-int num_task_;
-int num_body_;
-
-Model* model_;
-
-std::vector<CustomJoint> custom_joints_;
-std::vector<Eigen::Vector3d> end_effectors_;  //head larm rarm
-std::map<std::string, Eigen::Vector3d> marker_offsets_;
+std::string solver_type_;
 std::map<std::string, std::vector<double>> gains_;
 
 Math::VectorNd current_q_;
@@ -124,8 +116,37 @@ Math::VectorNd prev_qdot_;
 std::vector<Math::MatrixNd> jacs_; //thorax_jac_, lshoulder_jac, lhand_jac, rshoulder_jac, rhand_jac, head;
 std::vector<int> target_indices_; //model id in tracker order;
 
-CQuadraticProgram qp_;
+std::vector<Eigen::Vector3d> end_effectors_;  //head larm rarm
+std::map<std::string, Eigen::Vector3d> marker_offsets_;
+int num_body_;
+DataHandler &dh_;
+int num_task_;
+double h_; //timestep
+
+//Logger
+bool is_log_;
+CsvLogger* q_logger_;
+std::chrono::high_resolution_clock::time_point start_time_;
+
+std::string bvh_file_;
+private:
+//Common Method
+virtual void initParams() = 0;
+virtual void parseToml(std::string &toml_path) = 0;
+virtual void solveIK() = 0;
+
+int skel_pub_ind_;
+int rpose_pub_ind_[NUM_TRACKER + 1];
+int ftracker_pub_ind_[NUM_TRACKER + 1];
+
+
+
+std::vector<CustomJoint> custom_joints_;
+
+
+
+
 };
 }
-#endif //SKELETON_KINMEMATICS_H
+#endif //SKELETON_KINMEMATICS_BASE_H
 

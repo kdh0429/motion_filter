@@ -49,9 +49,11 @@ int main(int argc, char **argv)
 
     while(ros::ok())
     {
+        auto begin = std::chrono::high_resolution_clock::now();
+
         Eigen::Isometry3d* T;
 
-        T = dh.getObs();
+        T = dh.getRaw();
         status = dh.getTrackerStatus();
         std::vector<std::thread> ts;
 
@@ -68,7 +70,10 @@ int main(int argc, char **argv)
         }
 
         ros::spinOnce();
-        // loop_rate.sleep();
+        loop_rate.sleep();
+        auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[us]" << std::endl;
+        std::cout<<"\n===================================================================\n"<<std::endl;
     }
 
     return 0;

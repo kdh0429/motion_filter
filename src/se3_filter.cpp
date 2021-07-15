@@ -16,12 +16,12 @@ SE3Filter::SE3Filter(ros::NodeHandle &nh, int tracker_id, double dt, bool verbos
     dt_ = dt;
     verbose_ = verbose;
 
-    if (tracker_id_ < NUM_TRACKER)
-        pose_pub_ = nh.advertise<VR::matrix_3_4>("/FTRACKER" + std::to_string(tracker_id), 100);
-    else
-        pose_pub_ = nh.advertise<VR::matrix_3_4>("/FHMD", 100);
+    // if (tracker_id_ < NUM_TRACKER)
+    //     pose_pub_ = nh.advertise<VR::matrix_3_4>("/FTRACKER" + std::to_string(tracker_id), 100);
+    // else
+    //     pose_pub_ = nh.advertise<VR::matrix_3_4>("/FHMD", 100);
 
-    vel_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Fspvel" + std::to_string(tracker_id), 100);
+    // vel_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Fspvel" + std::to_string(tracker_id), 100);
     fpos_quat_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Fposquat" + std::to_string(tracker_id), 100);
     rpos_quat_pub_ = nh.advertise<std_msgs::Float64MultiArray>("/Rposquat" + std::to_string(tracker_id), 100);
 
@@ -84,15 +84,31 @@ void SE3Filter::step(Eigen::Isometry3d T_m, bool tracker_status)
     }
     else
     {
-        predict();
         if (key_ == 0)
+        {
+            predict();
             ekfUpdate(T_m);
+        }
         else if (key_ == 1)
+        {
+            predict();
             isekfUpdate(T_m);
+        }
+        else if (key_ == 2)
+        {
+            lpf(T_m);
+        }
         else
             std::logic_error("Unknown filter type");
     }
-    publish(tracker_status);
+    if (is_publish_)
+        publish(tracker_status);
+}
+
+void SE3Filter::lpf(Eigen::Isometry3d T_m)
+{
+    T_raw_ = manif::SE3d(T_m);
+    T_ = T_ + (T_raw_ - T_) * alpha_;
 }
 void SE3Filter::restart()
 {
@@ -169,7 +185,7 @@ void SE3Filter::dynamicClipUpdate(Vector6d z)
 void SE3Filter::publish(bool tracker_status)
 {
     //VR message default
-    pose_pub_.publish(isometry3d2VRmsg(getTransform()));
+    // pose_pub_.publish(isometry3d2VRmsg(getTransform()));
 
     //pos quat
     std_msgs::Float64MultiArray fposquat; //a.k.a std::vector<double>
@@ -206,6 +222,7 @@ void SE3Filter::parseToml(std::string &toml_path)
     auto data = toml::parse(toml_path);
     //default kalman filter params
     key_ = toml::find<int>(data, "key");
+    is_publish_ = toml::find<bool>(data, "publish");
 
     if (key_==0)
     {
@@ -271,6 +288,14 @@ void SE3Filter::parseToml(std::string &toml_path)
         sigma_ = sigma_init_;
         epsilon_ = epsilon_init_;
     }
+
+    else if (key_ == 2)
+    {
+        //low pass filter first order
+        auto& lpf = toml::find(data, "LPF");
+        alpha_ = toml::find<double>(lpf, "alpha");
+    }
+
 }
 
 

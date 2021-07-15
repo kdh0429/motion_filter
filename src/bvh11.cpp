@@ -266,7 +266,7 @@ namespace bvh11
         }();
         
         // Read the MOTION part
-        std::cout<<"motion start"<<std::endl;
+        // std::cout<<"motion start"<<std::endl;
         [&]() -> void
         {
             // Read the number of frames

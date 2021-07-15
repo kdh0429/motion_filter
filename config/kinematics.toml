@@ -1,18 +1,14 @@
 title="Skeleton Kinematics Config"
+############################################ Common Paramenter ##################################################
 
-bvh_file="sdh_skeleton_rigid.bvh"
-# bvh_file="sdh_skeleton.bvh"
+# bvh_file="sdh_skeleton_rigid.bvh"
+bvh_file="sdh_skeleton.bvh"
 
 #thorax, lshoulder, lhand, rshoulder, rhead
-target_index = [1, 3, 5, 6, 8, 2] # shoulder rigid.bvh in rbdl model
-# target_index = [1, 4, 6, 8, 10, 2] # shoulder dof.bvh in rbdl model
+# target_index = [1, 3, 5, 6, 8, 2] # shoulder rigid.bvh in rbdl model
+target_index = [1, 4, 6, 8, 10, 2] # shoulder dof.bvh in rbdl model
 
-solver="lsq" #huber
-
-[gains] #ang, lin
-hand = [20.0, 100.0] 
-shoulder = [20.0, 100.0]
-thorax = [20.0, 100.0]
+logging = false
 
 [tracker_offsets] #local offset x y z (m)
 thorax = [0.15, 0.0, 0.49]
@@ -20,5 +16,45 @@ lshoulder = [0.0, 0.15, 0.08]
 lhand = [0.0, 0.04, 0.08]
 rshoulder = [0.0, -0.15, 0.08]
 rhand = [0.0, -0.04, 0.08]
-
 head = [0.0, 0.0, 0.0]
+
+############################################ Least Square Solution Paramenter ##################################################
+[lsq]
+dt = 0.001
+alpha = 0.001
+
+[lsq.gains]
+hand = [40.0, 400.0] 
+shoulder = [40.0, 400.0]
+thorax = [40.0, 400.0]
+############################################ Huber  Loss  Solution Paramenter ##################################################
+
+
+[huber]
+gamma = 150.0
+filter_type = 0 # 0: low pass 1: kalman
+
+dt = 0.004 
+alpha = 0.004
+
+process_noise= 0.01 #constant acceleration white noise 
+measurement_noise = 1.00
+
+[huber.gains] #ang, lin
+hand = [20.0, 200.0] 
+shoulder = [20.0, 200.0]
+thorax = [20.0, 200.0]
+
+############################################ Kalman Filter Solution Paramenter ##################################################
+
+[ekf]
+time_step = 0.02
+process_noise= 1.0 #constant acceleration white noise 
+init_state_std = [0.01, 0.01]#identical for all joint[rad rad/s]
+measurement_noise= [0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1
+                    ] #ang, lin

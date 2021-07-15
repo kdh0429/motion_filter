@@ -29,14 +29,16 @@ DataHandler(ros::NodeHandle &nh): nh_(nh)
 void trackersCallback(const ros::MessageEvent<VR::matrix_3_4>& event);
 void hmdCallback(const VR::matrix_3_4 &msg);
 void trackersStatusCallback(const std_msgs::Bool & msg);
-Eigen::Isometry3d* getObs() {return raw_poses_;};
+Eigen::Isometry3d* getRaw() {return raw_poses_;};
+Eigen::Isometry3d* getFiltered() {return filtered_poses_;};
+void setFiltered(int tracker_id, Eigen::Isometry3d T){ filtered_poses_[tracker_id] = T;};
 bool getTrackerStatus() {return tracker_status_;};
 
 template<typename M>
 int addPublisher(std::string name, uint32_t queue_size);
 
 template<typename M>
-void publish(M &message, int index);
+void publish(M message, int index);
 
 private:
 ros::NodeHandle &nh_;
@@ -47,6 +49,8 @@ ros::Subscriber hmd_sub_;
 std::vector<ros::Publisher> pubs_;
 
 Eigen::Isometry3d raw_poses_[NUM_TRACKER + 1]; //pelvis, chect, lelbow, lhand, relbow, rhand, head
+Eigen::Isometry3d filtered_poses_[NUM_TRACKER + 1]; //pelvis, chect, lelbow, lhand, relbow, rhand, head
+
 bool tracker_status_ = false;
 
 };
@@ -59,7 +63,7 @@ int DataHandler::addPublisher(std::string name, uint32_t queue_size)
     return index;
 }
 template<typename M>
-void DataHandler::publish(M &message, int index)
+void DataHandler::publish(M message, int index)
 {
     pubs_.at(index).publish(message);
 }

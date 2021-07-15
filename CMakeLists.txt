@@ -76,7 +76,12 @@ ${Boost_LIBRARIES}
 file(GLOB MFSRC
 "src/data_handler.cpp"
 "src/se3_filter.cpp"
-"src/skeleton_kinematics.cpp"
+"src/skeleton_kinematics_base.cpp"
+"src/skeleton_kinematics_huber.cpp"
+"src/skeleton_kinematics_kalman.cpp"
+"src/skeleton_kinematics_lsq.cpp"
+"src/kalman_filter.cpp"
+
 )
 add_library(motion_filter_lib STATIC
   ${MFSRC}
@@ -105,13 +110,20 @@ add_dependencies(motion_filter_lib ${catkin_EXPORTED_TARGETS})
 # MAIN #
 ########
 
-add_executable(main src/main.cpp)
-target_link_libraries(main 
+add_executable(se3_filter_main main/se3_filter_main.cpp)
+target_link_libraries(se3_filter_main
   motion_filter_lib
   ${catkin_LIBRARIES}
 )
-add_dependencies(main ${catkin_EXPORTED_TARGETS})
+add_dependencies(se3_filter_main ${catkin_EXPORTED_TARGETS})
 
+add_executable(skel_kinect_main main/skel_kinect_main.cpp)
+target_link_libraries(skel_kinect_main 
+rbdl
+Eigen3::Eigen
+motion_filter_lib
+${catkin_LIBRARIES}
+)
 
 ########
 # TEST #
@@ -127,7 +139,6 @@ target_link_libraries(calibration
  ${catkin_LIBRARIES}
  motion_filter_lib
  )
-
 target_include_directories(calibration SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
 
 add_executable(logger_test test/logger_test.cpp)
@@ -137,16 +148,26 @@ target_include_directories(logger_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
 add_executable(bvh_read test/bvh_read.cpp)
 target_link_libraries(bvh_read bvh11)
 
-add_executable(rbdl_kinematics test/rbdl_kinematics.cpp)
-target_link_libraries(rbdl_kinematics 
-rbdl
-Eigen3::Eigen
-motion_filter_lib
-${catkin_LIBRARIES}
-)
-
 add_executable(data_handler_test test/data_handler_test.cpp)
 target_link_libraries(data_handler_test 
 motion_filter_lib
 ${catkin_LIBRARIES}
 )
+
+add_executable(manifold_kinematics_test test/manifold_kinematics_test.cpp)
+target_link_libraries(manifold_kinematics_test 
+rbdl
+Eigen3::Eigen
+qp_lib
+)
+target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
+target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})
+
+add_executable(pointer_test test/pointer_test.cpp)
+target_link_libraries(pointer_test 
+rbdl
+Eigen3::Eigen
+# qp_lib
+)
+# target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
+# target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})

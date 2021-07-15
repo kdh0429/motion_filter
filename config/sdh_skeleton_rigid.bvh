@@ -14,7 +14,7 @@ ROOT Spine
     }
 	JOINT LeftArm
 	{
-		OFFSET 0.0 0.18 0.735
+		OFFSET 0.0 0.18 0.70
 		CHANNELS 3 Zrotation Yrotation Xrotation
 		JOINT LeftElbow
 		{

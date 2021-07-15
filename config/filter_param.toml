@@ -1,6 +1,6 @@
 #common paramas
-key = 0 #filter_type 0: ekf, 1:"isekf"
-
+key = 2 #filter_type 0: ekf, 1:"isekf"
+publish = false
 # std(delta pos: m), std(deta delta rot: rad),
 # std(v: m/s), std(w: rad/s)
 [EKF]
@@ -8,7 +8,7 @@ init_state_std = [1.0, 0.1, 0.1, 0.1, 0.1, 0.1,
                   0.1, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 process_noise= [1.0, 1.0, 1.0, 3.14, 3.14, 3.14] # std(v: m/s), std(w: rad/s) 
-measurement_noise= [1.0, 1.0, 1.0, 3.14, 3.14, 3.14]# std(delta pos: m/s), std(deta delta rot: rad/s)
+measurement_noise= [0.1, 0.1, 0.1, 0.3, 0.3, 0.3]# std(delta pos: m/s), std(deta delta rot: rad/s)
 
 [ISEKF]
 init_state_std = [1.0, 0.1, 0.1, 0.1, 0.1, 0.1,
@@ -27,3 +27,8 @@ lambda1 = [0.5, 0.5]
 lambda2 = [0.5, 0.5]
 gamma1 = [1.0, 1.0]
 gamma2 = [1.0, 1.0]
+
+[LPF]
+alpha = 0.005 #lsq
+
+
