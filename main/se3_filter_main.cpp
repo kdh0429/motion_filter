@@ -39,9 +39,9 @@ int main(int argc, char **argv)
 
     auto func = [&](Eigen::Isometry3d* T, int i, bool status, SE3Filter *filter)
     {
-        double flag = ((T+i)->linear()).determinant();
+        // double flag = ((T+i)->linear()).determinant();
         // std::cout<<"index: "<<i<<" flag: "<<flag<<std::endl;
-        if (fabs(flag - 1.0) < 1e-6)
+        if (status)
         {
             filters[i] -> step(T[i], status);
         }
@@ -57,7 +57,8 @@ int main(int argc, char **argv)
         status = dh.getTrackerStatus();
         std::vector<std::thread> ts;
 
-        for (int i=0;i<NUM_TRACKER + 1;i++)
+        // for (int i=0;i<NUM_TRACKER + 1;i++)
+        for (int i=2;i<3;i++)
         {
             std::thread t(func, T, i, status, filters[i]);
             ts.push_back(std::move(t));
@@ -72,8 +73,8 @@ int main(int argc, char **argv)
         ros::spinOnce();
         loop_rate.sleep();
         auto end = std::chrono::high_resolution_clock::now();
-        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[us]" << std::endl;
-        std::cout<<"\n===================================================================\n"<<std::endl;
+        // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[us]" << std::endl;
+        // std::cout<<"\n===================================================================\n"<<std::endl;
     }
 
     return 0;

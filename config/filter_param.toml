@@ -1,6 +1,6 @@
 #common paramas
-key = 2 #filter_type 0: ekf, 1:"isekf"
-publish = false
+key = 0 #filter_type 0: ekf, 1:"isekf"
+publish = true
 # std(delta pos: m), std(deta delta rot: rad),
 # std(v: m/s), std(w: rad/s)
 [EKF]
@@ -30,5 +30,23 @@ gamma2 = [1.0, 1.0]
 
 [LPF]
 alpha = 0.005 #lsq
+
+[RUKF]
+#sigma point parameter
+alpha = 0.1
+beta = 2.0
+kappa = 1.0
+
+#init std gaussian
+init_state_std = [1.0, 0.1, 0.1, 0.1, 0.1, 0.1,
+                  0.1, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+#process noise gaussian
+process_noise= [1.0, 1.0, 1.0, 3.14, 3.14, 3.14] # std(v: m/s), std(w: rad/s) 
+#measurement noise gaussian
+measurement_noise= [0.01, 0.01, 0.01, 0.003, 0.003, 0.003]# std(delta pos: m), std(deta delta rot: rad)
+#mensurement noise cauchy(student t with degree of freedom 1)
+cauchy_noise = [0.1, 0.1, 0.1, 0.03, 0.03, 0.03]
+cauchy_noise_weight = 0.01
 
 

@@ -7,6 +7,7 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 
 Add LowPass Filter in SE3
 */
+//TODO need polymorphism as the number of algo increases.
 #ifndef SE3_FILTER_H
 #define SE3_FILTER_H
 
@@ -17,8 +18,32 @@ Add LowPass Filter in SE3
 #include <motion_filter/data_handler.hpp>
 #include <std_msgs/Float64MultiArray.h>
 
+using namespace Eigen;
+
 namespace motion_filter
 {
+
+double gaussianPdf(VectorXd x, VectorXd mu, MatrixXd sigma);
+double studentTPdf(VectorXd x, VectorXd mu, MatrixXd sigma, int df);
+VectorXd pusedoMeasurementForManifold(Vector6d m_diff, Matrix6d gauss_cov, Matrix6d cauchy_cov, double weight);
+class MerweScaledSigmaPoints
+{
+public:
+MerweScaledSigmaPoints(int n, double alpha, double beta, double kappa);
+~MerweScaledSigmaPoints();
+Eigen::MatrixXd getSigmaPoints(Eigen::VectorXd mean, Eigen::MatrixXd cov);
+Eigen::VectorXd Wn;
+Eigen::VectorXd Wc;
+private:
+void computeWeights();
+//sigma points parameters
+double lambda_;
+const double alpha_;
+const int n_;
+const double beta_;
+const double kappa_;
+};
+
 class SE3Filter
 {
 public:
@@ -31,14 +56,17 @@ void step(Eigen::Isometry3d T_m, bool tracker_status);
 void restart();
 int getId(){return tracker_id_;};
 double getTimeStep(){return dt_;};
+
 private:
 void parseToml(std::string &toml_path);
 void predict();
 void ekfUpdate(Eigen::Isometry3d T_m);
+void ukfKalman(Eigen::Isometry3d T_m);
 void isekfUpdate(Eigen::Isometry3d T_m);
 void dynamicClipUpdate(Vector6d z);
 void publish(bool tracker_status);
 void lpf(Eigen::Isometry3d T_m);
+
 ros::Publisher pose_pub_;
 ros::Publisher fpos_quat_pub_; //filter
 ros::Publisher rpos_quat_pub_; //raw
@@ -46,7 +74,7 @@ ros::Publisher vel_pub_;
 
 int key_;
 int tracker_id_;
-const char* algo[3] = {"LGEKF", "LGISEKF", "LPF"};
+const char* algo[4] = {"LGEKF", "LGISEKF", "LPF", "LGRUKF"};
 
 double dt_;
 
@@ -80,8 +108,14 @@ Vector6d lambda1_;
 Vector6d lambda2_;
 Vector6d gamma1_;
 Vector6d gamma2_;
-
+//lpf
 double alpha_;
+
+//ukf
+MerweScaledSigmaPoints* sigma_points_12d_;
+MerweScaledSigmaPoints* sigma_points_6d_;
+double cauchy_weight_;
+Matrix6d cauchy_cov_;
 
 //Logger
 CsvLogger* rlogger_;

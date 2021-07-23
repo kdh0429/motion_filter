@@ -154,6 +154,12 @@ motion_filter_lib
 ${catkin_LIBRARIES}
 )
 
+add_executable(ukf_test test/ukf_test.cpp)
+target_link_libraries(ukf_test 
+motion_filter_lib
+${catkin_LIBRARIES}
+)
+
 add_executable(manifold_kinematics_test test/manifold_kinematics_test.cpp)
 target_link_libraries(manifold_kinematics_test 
 rbdl
