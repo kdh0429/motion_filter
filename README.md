@@ -13,3 +13,8 @@ cd toml11 && mkdir build && cd build
 cmake ..
 make install
 ```
+
+* Build for Windows
+'''bash
+https://stackoverflow.com/questions/21387504/cmake-and-make-in-windows
+'''
