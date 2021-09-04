@@ -15,6 +15,6 @@ make install
 ```
 
 * Build for Windows
-'''bash
+```bash
 https://stackoverflow.com/questions/21387504/cmake-and-make-in-windows
-'''
+```
