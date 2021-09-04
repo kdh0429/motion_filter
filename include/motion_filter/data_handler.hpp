@@ -2,13 +2,13 @@
 #define DATA_HANDLER_H
 
 #include <vector>
-#include "VR/matrix_3_4.h"
+#include "tocabi_msgs/matrix_3_4.h"
 #include <motion_filter/type_def.hpp>
 #include <std_msgs/Bool.h>
 
 namespace motion_filter
 {
-VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T);
+tocabi_msgs::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T);
 
 class DataHandler
 {
@@ -26,8 +26,8 @@ DataHandler(ros::NodeHandle &nh): nh_(nh)
     raw_poses_[NUM_TRACKER].linear().setIdentity();
     raw_poses_[NUM_TRACKER].translation().setZero();
 }
-void trackersCallback(const ros::MessageEvent<VR::matrix_3_4>& event);
-void hmdCallback(const VR::matrix_3_4 &msg);
+void trackersCallback(const ros::MessageEvent<tocabi_msgs::matrix_3_4>& event);
+void hmdCallback(const tocabi_msgs::matrix_3_4 &msg);
 void trackersStatusCallback(const std_msgs::Bool & msg);
 Eigen::Isometry3d* getRaw() {return raw_poses_;};
 Eigen::Isometry3d* getFiltered() {return filtered_poses_;};

@@ -27,6 +27,7 @@ int main(int argc, char **argv)
     double dt = 1.0/1000.0;
 
     DataHandler dh = DataHandler(nh);
+    
     SE3Filter *filters[NUM_TRACKER + 1];
     for (int i=0;i<NUM_TRACKER + 1;i++)
     {
@@ -57,8 +58,8 @@ int main(int argc, char **argv)
         status = dh.getTrackerStatus();
         std::vector<std::thread> ts;
 
-        // for (int i=0;i<NUM_TRACKER + 1;i++)
-        for (int i=2;i<3;i++)
+        for (int i=0;i<NUM_TRACKER + 1;i++)
+        // for (int i=2;i<3;i++)
         {
             std::thread t(func, T, i, status, filters[i]);
             ts.push_back(std::move(t));

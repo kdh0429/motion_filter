@@ -2,11 +2,11 @@
 
 namespace motion_filter
 {
-VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T)
+tocabi_msgs::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T)
 {
   Eigen::Matrix4d T_mat = T.matrix();
 
-  VR::matrix_3_4 msg;
+  tocabi_msgs::matrix_3_4 msg;
 
   Eigen::RowVector4d rv1, rv2, rv3;
   rv1 = T_mat.block(0, 0, 1, 4);
@@ -25,12 +25,12 @@ VR::matrix_3_4 isometry3d2VRmsg(Eigen::Isometry3d T)
   return msg;
 }
 
-void DataHandler::trackersCallback(const ros::MessageEvent<VR::matrix_3_4>& event)
+void DataHandler::trackersCallback(const ros::MessageEvent<tocabi_msgs::matrix_3_4>& event)
 {
     const ros::M_string& header = event.getConnectionHeader();
     std::string topic = header.at("topic");
     int index = topic.back() - '0';
-    const VR::matrix_3_4ConstPtr& msg = event.getMessage();
+    const tocabi_msgs::matrix_3_4ConstPtr& msg = event.getMessage();
 
     raw_poses_[index].linear().block(0, 0, 1, 3) = Eigen::RowVectorXd::Map(msg->firstRow.data(), 3);
     raw_poses_[index].linear().block(1, 0, 1, 3) = Eigen::RowVectorXd::Map(msg->secondRow.data(), 3);
@@ -42,7 +42,7 @@ void DataHandler::trackersCallback(const ros::MessageEvent<VR::matrix_3_4>& even
 
     // std::cout<<index <<":\t"<<raw_poses_[index].linear().determinant()<<std::endl;    
 }
-void DataHandler::hmdCallback(const VR::matrix_3_4 &msg)
+void DataHandler::hmdCallback(const tocabi_msgs::matrix_3_4 &msg)
 {
 
     raw_poses_[NUM_TRACKER].linear().block(0, 0, 1, 3) = Eigen::RowVectorXd::Map(msg.firstRow.data(), 3);

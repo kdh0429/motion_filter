@@ -6,7 +6,7 @@ Autor: Donghyun Sung sdh1259@snu.ac.kr
 #ifndef TYPE_DEF_H
 #define TYPE_DEF_H
 
-#include "VR/matrix_3_4.h"
+#include "tocabi_msgs/matrix_3_4.h"
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <unsupported/Eigen/MatrixFunctions>

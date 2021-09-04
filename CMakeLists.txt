@@ -9,8 +9,6 @@ add_compile_options(-std=c++11)
 if (WIN32)
 message(STATUS "WINDOW")
   set(toml11_INCLUDE_DIRS "C:/Program Files (x86)/toml11/include")
-  include_directories("C:/Program Files (x86)/RBDL/include" "C:/Program Files (x86)/qpOASES/include")
-  link_directories("C:/Program Files (x86)/RBDL/lib" "C:/Program Files (x86)/qpOASES/lib")
 endif (WIN32)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
@@ -21,7 +19,7 @@ roscpp
 roslib
 # sensor_msgs
 std_msgs
-VR
+tocabi_msgs
   # tf
   #mujoco_ros
   # eigen_conversions
@@ -43,7 +41,7 @@ message(STATUS "TOML DIR ${toml11_INCLUDE_DIRS}")
 message(STATUS "MANIF DIR ${manif_FOUND} ${manif_INCLUDE_DIRS}")
 
 catkin_package(
-  CATKIN_DEPENDS VR
+  CATKIN_DEPENDS tocabi_msgs
 )
 
 
@@ -59,9 +57,6 @@ add_library(bvh11 STATIC src/bvh11.cpp)
 target_link_libraries(bvh11 Eigen3::Eigen)
 target_include_directories(bvh11 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(qp_lib STATIC src/quadraticprogram.cpp)
-target_link_libraries(qp_lib Eigen3::Eigen qpOASES)
-target_include_directories(qp_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_library(logger_lib STATIC
 "src/logger.cpp"
@@ -76,10 +71,6 @@ ${Boost_LIBRARIES}
 file(GLOB MFSRC
 "src/data_handler.cpp"
 "src/se3_filter.cpp"
-"src/skeleton_kinematics_base.cpp"
-"src/skeleton_kinematics_huber.cpp"
-"src/skeleton_kinematics_kalman.cpp"
-"src/skeleton_kinematics_lsq.cpp"
 "src/kalman_filter.cpp"
 
 )
@@ -87,8 +78,6 @@ add_library(motion_filter_lib STATIC
   ${MFSRC}
 )
 target_link_libraries(motion_filter_lib
-  qp_lib
-  rbdl
   ${catkin_LIBRARIES}
   ${Eigen3_LIBRARIES}
   ${toml11_LIBRARIES}
@@ -116,64 +105,3 @@ target_link_libraries(se3_filter_main
   ${catkin_LIBRARIES}
 )
 add_dependencies(se3_filter_main ${catkin_EXPORTED_TARGETS})
-
-add_executable(skel_kinect_main main/skel_kinect_main.cpp)
-target_link_libraries(skel_kinect_main 
-rbdl
-Eigen3::Eigen
-motion_filter_lib
-${catkin_LIBRARIES}
-)
-
-########
-# TEST #
-########
-
-add_executable(mainf_test test/manif_test.cpp)
-target_include_directories(mainf_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
-target_include_directories(mainf_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})
-
-add_executable(calibration test/calibration.cpp)
-target_link_libraries(calibration
- logger_lib 
- ${catkin_LIBRARIES}
- motion_filter_lib
- )
-target_include_directories(calibration SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
-
-add_executable(logger_test test/logger_test.cpp)
-target_link_libraries(logger_test logger_lib ${catkin_LIBRARIES})
-target_include_directories(logger_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
-
-add_executable(bvh_read test/bvh_read.cpp)
-target_link_libraries(bvh_read bvh11)
-
-add_executable(data_handler_test test/data_handler_test.cpp)
-target_link_libraries(data_handler_test 
-motion_filter_lib
-${catkin_LIBRARIES}
-)
-
-add_executable(ukf_test test/ukf_test.cpp)
-target_link_libraries(ukf_test 
-motion_filter_lib
-${catkin_LIBRARIES}
-)
-
-add_executable(manifold_kinematics_test test/manifold_kinematics_test.cpp)
-target_link_libraries(manifold_kinematics_test 
-rbdl
-Eigen3::Eigen
-qp_lib
-)
-target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
-target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})
-
-add_executable(pointer_test test/pointer_test.cpp)
-target_link_libraries(pointer_test 
-rbdl
-Eigen3::Eigen
-# qp_lib
-)
-# target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIRS})
-# target_include_directories(manifold_kinematics_test SYSTEM PUBLIC ${manif_INCLUDE_DIRS})
